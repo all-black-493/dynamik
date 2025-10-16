@@ -5,6 +5,8 @@ import { createOpenAI } from "@ai-sdk/openai"
 import { createAnthropic } from "@ai-sdk/anthropic"
 import { createXai } from '@ai-sdk/xai';
 import { generateText } from "ai";
+import * as Sentry from "@sentry/nextjs";
+
 
 const google = createGoogleGenerativeAI()
 const openai = createOpenAI()
@@ -17,13 +19,21 @@ export const execute = inngest.createFunction(
 
     async ({ event, step }) => {
         await step.sleep("pretend-to-sleep", "12s")
+
+        Sentry.logger.info('User triggered test log yooohooo', { log_source: 'sentry_test' })
+
         const { steps: geminiSteps } = await step.ai.wrap(
             "gemini-generate-text",
             generateText,
             {
                 model: google("gemini-2.5-flash"),
                 system: "You are a helpful assistant",
-                prompt: "How close is the United States to becoming an explicitly Christian Nation today? And was Mrs E G White right in her prediction that the United States is veering to that direction?"
+                prompt: "How close is the United States to becoming an explicitly Christian Nation today? And was Mrs E G White right in her prediction that the United States is veering to that direction?",
+                experimental_telemetry: {
+                    isEnabled: true,
+                    recordInputs: true,
+                    recordOutputs: true,
+                },
             }
         )
 
@@ -33,7 +43,12 @@ export const execute = inngest.createFunction(
             {
                 model: openai("gpt-5-pro"),
                 system: "You are a helpful assistant",
-                prompt: "How close is the United States to becoming an explicitly Christian Nation today? And was Mrs E G White right in her prediction that the United States is veering to that direction?"
+                prompt: "How close is the United States to becoming an explicitly Christian Nation today? And was Mrs E G White right in her prediction that the United States is veering to that direction?",
+                experimental_telemetry: {
+                    isEnabled: true,
+                    recordInputs: true,
+                    recordOutputs: true,
+                },
             }
         )
 
@@ -43,7 +58,12 @@ export const execute = inngest.createFunction(
             {
                 model: anthropic("claude-sonnet-4-5"),
                 system: "You are a helpful assistant",
-                prompt: "How close is the United States to becoming an explicitly Christian Nation today? And was Mrs E G White right in her prediction that the United States is veering to that direction?"
+                prompt: "How close is the United States to becoming an explicitly Christian Nation today? And was Mrs E G White right in her prediction that the United States is veering to that direction?",
+                experimental_telemetry: {
+                    isEnabled: true,
+                    recordInputs: true,
+                    recordOutputs: true,
+                },
             }
         )
 
@@ -53,7 +73,12 @@ export const execute = inngest.createFunction(
             {
                 model: xai("grok-4"),
                 system: "You are a helpful assistant",
-                prompt: "How close is the United States to becoming an explicitly Christian Nation today? And was Mrs E G White right in her prediction that the United States is veering to that direction?"
+                prompt: "How close is the United States to becoming an explicitly Christian Nation today? And was Mrs E G White right in her prediction that the United States is veering to that direction?",
+                experimental_telemetry: {
+                    isEnabled: true,
+                    recordInputs: true,
+                    recordOutputs: true,
+                },
             }
         )
 
