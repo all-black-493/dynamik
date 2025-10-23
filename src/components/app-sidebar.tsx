@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/sidebar"
 import { authClient } from '@/lib/auth-client'
 import { toast } from 'sonner'
+import { useHasActiveSubscription } from '@/features/subscriptions/hooks/use-subscription'
 
 const menuItems = [
     {
@@ -54,6 +55,7 @@ const AppSidebar = () => {
 
     const router = useRouter()
     const pathname = usePathname()
+    const { hasActiveSubscription, isLoading } = useHasActiveSubscription()
     return (
         <Sidebar collapsible="icon">
             <SidebarHeader>
@@ -96,25 +98,39 @@ const AppSidebar = () => {
                     </SidebarGroup>
                 ))}
             </SidebarContent>
-                                                            
+
             <SidebarFooter>
                 <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton
-                            tooltip="Upgrade to Pro"
-                            className='gap-x-4 h-10 px-4'
-                            onClick={() => { }}
-                        >
-                            <StarIcon className='h-4 w-4' />
-                            <span>Upgrade to Pro</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
+                    {!hasActiveSubscription && !isLoading && (
+                        <SidebarMenuItem>
+                            <SidebarMenuButton
+                                tooltip="Upgrade to Pro"
+                                className='gap-x-4 h-10 px-4'
+                                onClick={async () => {
+                                    try {
+                                        authClient.checkout({ slug: "pro" })
+                                    } catch (err) {
+                                        console.log(err)
+                                    }
+                                }}
+                            >
+                                <StarIcon className='h-4 w-4' />
+                                <span>Upgrade to Pro</span>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    )}
 
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             tooltip="Accounts and Billing"
                             className='gap-x-4 h-10 px-4'
-                            onClick={() => { }}
+                            onClick={async () => {
+                                try {
+                                    authClient.customer.portal()
+                                } catch (err) {
+                                    console.log(err)
+                                }
+                            }}
                         >
                             <CreditCardIcon className='h-4 w-4' />
                             <span>Billing</span>
