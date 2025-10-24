@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import Providers from "./_providers";
 import { Toaster } from "sonner";
+import { NuqsAdapter } from "nuqs/adapters/next/app"
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -25,8 +26,10 @@ export default function RootLayout({
         className={`${outfit.className} dark antialiased`}
       >
         <Providers>
-          {children}
-          <Toaster />
+          <NuqsAdapter>
+            {children}
+            <Toaster />
+          </NuqsAdapter>
         </Providers>
       </body>
     </html>
