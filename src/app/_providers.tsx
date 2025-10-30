@@ -1,5 +1,6 @@
 import React from 'react'
 import { TRPCReactProvider } from '@/trpc/client'
+import { Provider } from 'jotai';
 
 const Providers = ({
     children,
@@ -9,7 +10,9 @@ const Providers = ({
     return (
         <div>
             <TRPCReactProvider>
-                {children}
+                <Provider>
+                    {children}
+                </Provider>
             </TRPCReactProvider>
         </div>
     )
