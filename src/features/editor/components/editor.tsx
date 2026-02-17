@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
     ReactFlow,
     applyNodeChanges,
@@ -24,6 +24,8 @@ import { nodeComponents } from '@/config/node-components';
 import { AddNodeButton } from './add-node-button';
 import { useSetAtom } from 'jotai';
 import { editorAtom } from '../store/atoms';
+import { NodeType } from '@/generated/prisma';
+import { ExecuteWorkflowButton } from './execute-workflow-button';
 
 export const EditorLoading = () => {
     return <LoadingView message="Loading Editor ..." />
@@ -54,6 +56,11 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
         (params: Connection) => setEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
         [],
     );
+
+    const hasManualTrigger = useMemo(() => {
+        return nodes.some((node) => node.type === NodeType.MANUAL_TRIGGER)
+    }, [nodes])
+    
     return (
         <div className="size-full">
             <ReactFlow
@@ -63,7 +70,7 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 fitView
-                snapGrid={[10,10]}
+                snapGrid={[10, 10]}
                 snapToGrid
                 panOnScroll
                 panOnDrag={false}
@@ -81,6 +88,13 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
                 <Panel position='top-left'>
                     <AddNodeButton />
                 </Panel>
+
+                {hasManualTrigger && (
+                    <Panel position='bottom-center'>
+                        <ExecuteWorkflowButton workflowId={workflowId} />
+                    </Panel>
+                )}
+
             </ReactFlow>
         </div>
     )
