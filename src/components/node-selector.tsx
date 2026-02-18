@@ -39,7 +39,21 @@ const triggerNodes: NodeTypeOption[] = [
         label: "Trigger manually",
         description: "Runs the flow on clicking a button. Good for getting started quickly",
         icon: MousePointerIcon,
-    }
+    },
+
+    {
+        type: NodeType.STRIPE_TRIGGER,
+        label: "Stripe Event",
+        description: "Runs the flow when a Stripe Event is captured",
+        icon: "/logos/stripe.svg",
+    },
+
+    {
+        type: NodeType.MPESA_TRIGGER,
+        label: "MPESA Event",
+        description: "Runs the flow when an MPESA Event occurs",
+        icon: "/logos/mpesa.png",
+    },
 
 ]
 
@@ -143,7 +157,7 @@ export function NodeSelector({
                                         <img
                                             src={Icon}
                                             alt={nodeType.label}
-                                            className="size-5 object-contain rounded-sm"
+                                            className="size-7 object-contain rounded-sm"
                                         />
                                     ) : (
                                         <Icon className="size-5" />
