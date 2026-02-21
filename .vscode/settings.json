@@ -1,4 +1,5 @@
 {
   "WillLuke.nextjs.hasPrompted": true,
-  "prisma.pinToPrisma6": true
+  "prisma.pinToPrisma6": true,
+  "terminal.integrated.tabs.defaultIcon": "zap"
 }

@@ -9,6 +9,12 @@ import { manualTriggerChannel } from "./channels/manual-trigger";
 import { googleFormTriggerChannel } from "./channels/google-form-trigger";
 import { stripeTriggerChannel } from "./channels/stripe-trigger";
 import { mpesaTriggerChannel } from "./channels/mpesa-trigger";
+import { geminiChannel } from "./channels/gemini";
+import { OpenAIChannel } from "./channels/openai";
+import { grokChannel } from "./channels/grok";
+import { perplexityChannel } from "./channels/perplexity";
+import { anthropicChannel } from "./channels/anthropic";
+import { deepseekChannel } from "./channels/deepseek";
 
 
 export const executeWorkflow = inngest.createFunction(
@@ -24,6 +30,12 @@ export const executeWorkflow = inngest.createFunction(
             googleFormTriggerChannel(),
             stripeTriggerChannel(),
             mpesaTriggerChannel(),
+            geminiChannel(),
+            OpenAIChannel(),
+            grokChannel(),
+            perplexityChannel(),
+            anthropicChannel(),
+            deepseekChannel()
         ]
     },
 
