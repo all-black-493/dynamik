@@ -1,0 +1,80 @@
+"use client"
+
+import { GEMINI_CHANNEL_NAME } from "@/inngest/channels/gemini"
+import { Node, NodeProps, useReactFlow } from "@xyflow/react"
+import { memo, useState } from "react"
+import useNodeStatus from "../../hooks/use-node-status"
+import { BaseExecutionNode } from "../base-execution-node"
+import { geminiRealtimeToken } from "./actions"
+import { AVAILABLE_MODELS, GeminiDialog, GeminiFormValues } from "./dialog"
+
+type geminiNodeData = {
+    variableName?: string;
+    model?: "gemini-1.5-flash" | "gemini-1.5-flash-8b" | "gemini-1.5-pro" | "gemini-1.0-pro" | "gemini-pro" ;
+    systemPrompt?: string;
+    userPrompt?: string;
+
+}
+
+type GeminiNodeType = Node<geminiNodeData>
+
+export const GeminiNode = memo((props: NodeProps<GeminiNodeType>) => {
+
+    const [dialogOpen, SetDialogOpen] = useState(false)
+
+    const { setNodes } = useReactFlow()
+
+    const nodeStatus = useNodeStatus({
+        nodeId: props.id,
+        channel: GEMINI_CHANNEL_NAME,
+        topic: "status",
+        refreshToken: geminiRealtimeToken,
+    })
+
+    const handleOpenSettings = () => SetDialogOpen(true)
+
+    const handleSubmit = (values: GeminiFormValues) => {
+        setNodes((nodes) => nodes.map((node) => {
+            if (node.id === props.id) {
+                return {
+                    ...node,
+                    data: {
+                        ...node.data,
+                        ...values,
+                    }
+                }
+            }
+            return node
+        }))
+    }
+
+    const nodeData = props.data
+    const description = nodeData?.userPrompt
+        ? `${nodeData.model}: ${nodeData.userPrompt.slice(0, 50)} ...`
+        : "Not configured"
+
+
+    return (
+        <>
+            <GeminiDialog
+                open={dialogOpen}
+                onOpenChange={SetDialogOpen}
+                onSubmit={handleSubmit}
+                defaultValues={nodeData}
+            />
+            <BaseExecutionNode
+                {...props}
+                id={props.id}
+                icon="/logos/gemini.svg"
+                name="Gemini"
+                status={nodeStatus}
+                description={description}
+                onSettings={handleOpenSettings}
+                onDoubleClick={handleOpenSettings}
+            />
+        </>
+    )
+})
+
+GeminiNode.displayName = "GeminiNode"
+
