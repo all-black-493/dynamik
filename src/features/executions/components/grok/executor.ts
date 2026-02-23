@@ -5,6 +5,7 @@ import { grokChannel } from "@/inngest/channels/grok";
 import { createXai } from "@ai-sdk/xai"
 import { generateText } from "ai"
 import { createMCPClient } from '@ai-sdk/mcp';
+import prisma from "@/lib/db";
 
 
 Handlebars.registerHelper("json", (context) => {
@@ -21,6 +22,7 @@ type grokData = {
     mcpServerUrl?: string;
     mcpAuthToken?: string;
     enabledTools?: string[];
+    credentialId?: string
 }
 
 export const grokExecutor: NodeExecutor<grokData> = async ({
@@ -37,6 +39,16 @@ export const grokExecutor: NodeExecutor<grokData> = async ({
             status: "loading"
         })
     )
+
+    if (!data.credentialId) {
+        await publish(
+            grokChannel().status({
+                nodeId,
+                status: "error"
+            })
+        )
+        throw new NonRetriableError("Grok node: Credential is required")
+    }
 
     if (!data.variableName) {
         await publish(
@@ -63,10 +75,20 @@ export const grokExecutor: NodeExecutor<grokData> = async ({
 
     const userPrompt = Handlebars.compile(data.userPrompt)(context)
 
-    const credentialValue = process.env.XAI_API_KEY!
+    const credential = await step.run("get-credential", () => {
+        return prisma.credential.findUnique({
+            where: {
+                id: data.credentialId
+            }
+        })
+    })
+
+    if(!credential){
+        throw new NonRetriableError("Grok node: Credential not found")
+    }
 
     const grok = createXai({
-        apiKey: credentialValue
+        apiKey: credential.value
     })
 
     let mcpClient;

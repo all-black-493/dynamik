@@ -15,16 +15,17 @@ datasource db {
 }
 
 model User {
-  id            String     @id
+  id            String       @id
   name          String
   email         String
-  emailVerified Boolean    @default(false)
+  emailVerified Boolean      @default(false)
   image         String?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @default(now()) @updatedAt
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
   workflows     Workflow[]
+  credentials   Credential[]
 
   @@unique([email])
   @@map("user")
@@ -75,6 +76,28 @@ model Verification {
   @@map("verification")
 }
 
+model Credential {
+  id    String @id @default(cuid())
+  name  String
+  value String
+  type CredentialType
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Node   Node[]
+}
+
+enum CredentialType {
+  OPENAI
+  GROK
+  ANTHROPIC
+  DEEPSEEK
+  PERPLEXITY
+  GEMINI
+}
+
 model Workflow {
   id        String   @id @default(cuid())
   name      String
@@ -84,9 +107,8 @@ model Workflow {
   nodes       Node[]
   connections Connection[]
 
-  userId     String
-  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum NodeType {
@@ -114,8 +136,11 @@ model Node {
   position Json
   data     Json     @default("{}")
 
+  credentialId String?
+  credential   Credential? @relation(fields: [credentialId], references: [id], onDelete: SetNull)
+
   outputConnections Connection[] @relation("FromNode")
-  inputConnections Connection[] @relation("ToNode")
+  inputConnections  Connection[] @relation("ToNode")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -127,13 +152,13 @@ model Connection {
   workflow   Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
 
   fromNodeId String
-  fromNode Node @relation("FromNode", fields: [fromNodeId], references: [id], onDelete: Cascade)
+  fromNode   Node   @relation("FromNode", fields: [fromNodeId], references: [id], onDelete: Cascade)
 
   toNodeId String
-  toNode Node @relation("ToNode", fields: [toNodeId], references: [id], onDelete: Cascade)
+  toNode   Node   @relation("ToNode", fields: [toNodeId], references: [id], onDelete: Cascade)
 
   fromOutput String @default("main")
-  toInput String @default("main")
+  toInput    String @default("main")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
