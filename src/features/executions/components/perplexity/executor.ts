@@ -5,7 +5,7 @@ import { perplexityChannel } from "@/inngest/channels/perplexity";
 import { createPerplexity } from "@ai-sdk/perplexity"
 import { generateText } from "ai"
 import { createMCPClient } from '@ai-sdk/mcp';
-
+import prisma from "@/lib/db";
 
 Handlebars.registerHelper("json", (context) => {
     const stringified = JSON.stringify(context, null, 2)
@@ -21,6 +21,7 @@ type perplexityData = {
     mcpServerUrl?: string;
     mcpAuthToken?: string;
     enabledTools?: string[];
+    credentialId?: string
 }
 
 export const perplexityExecutor: NodeExecutor<perplexityData> = async ({
@@ -48,6 +49,16 @@ export const perplexityExecutor: NodeExecutor<perplexityData> = async ({
         throw new NonRetriableError("Perplexity node: Variable name is missing")
     }
 
+    if (!data.credentialId) {
+        await publish(
+            perplexityChannel().status({
+                nodeId,
+                status: "error"
+            })
+        )
+        throw new NonRetriableError("Perplexity node: Credential is required")
+    }
+
     if (!data.userPrompt) {
         await publish(
             perplexityChannel().status({
@@ -63,10 +74,19 @@ export const perplexityExecutor: NodeExecutor<perplexityData> = async ({
 
     const userPrompt = Handlebars.compile(data.userPrompt)(context)
 
-    const credentialValue = process.env.PERPLEXITY_AI_API_KEY!
+    const credential = await step.run("get-credential", () => {
+        return prisma.credential.findUnique({
+            where: {
+                id: data.credentialId
+            }
+        })
+    })
 
+    if (!credential) {
+        throw new NonRetriableError("Perplexity node: Credential not found")
+    }
     const perplexity = createPerplexity({
-        apiKey: credentialValue
+        apiKey: credential.value
     })
 
     let mcpClient;

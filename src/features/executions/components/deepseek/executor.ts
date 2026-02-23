@@ -5,7 +5,7 @@ import { deepseekChannel } from "@/inngest/channels/deepseek";
 import { createDeepSeek } from "@ai-sdk/deepseek"
 import { generateText } from "ai"
 import { createMCPClient } from '@ai-sdk/mcp';
-
+import prisma from "@/lib/db";
 
 Handlebars.registerHelper("json", (context) => {
     const stringified = JSON.stringify(context, null, 2)
@@ -21,6 +21,8 @@ type deepseekData = {
     mcpServerUrl?: string;
     mcpAuthToken?: string;
     enabledTools?: string[];
+    credentialId?: string
+
 }
 
 export const deepseekExecutor: NodeExecutor<deepseekData> = async ({
@@ -48,6 +50,16 @@ export const deepseekExecutor: NodeExecutor<deepseekData> = async ({
         throw new NonRetriableError("Deepseek node: Variable name is missing")
     }
 
+    if (!data.credentialId) {
+        await publish(
+            deepseekChannel().status({
+                nodeId,
+                status: "error"
+            })
+        )
+        throw new NonRetriableError("Deepseek node: Credential is required")
+    }
+
     if (!data.userPrompt) {
         await publish(
             deepseekChannel().status({
@@ -63,10 +75,19 @@ export const deepseekExecutor: NodeExecutor<deepseekData> = async ({
 
     const userPrompt = Handlebars.compile(data.userPrompt)(context)
 
-    const credentialValue = process.env.DEEPSEEK_API_KEY!
+    const credential = await step.run("get-credential", () => {
+        return prisma.credential.findUnique({
+            where: {
+                id: data.credentialId
+            }
+        })
+    })
 
+    if (!credential) {
+        throw new NonRetriableError("Deepseek node: Credential not found")
+    }
     const deepseek = createDeepSeek({
-        apiKey: credentialValue
+        apiKey: credential.value
     })
 
     let mcpClient;

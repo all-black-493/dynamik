@@ -18,6 +18,9 @@ import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import useSWR from "swr";
+import { useCredentialsByType } from "@/features/credentials/hooks/use-credentials"
+import { CredentialType } from "@/generated/prisma"
+import Image from "next/image"
 
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -30,6 +33,7 @@ const formSchema = z.object({
             error: "Variable name must start with a letter or underscore and contain only letters, numbers, and underscores"
         }),
     model: z.string().min(1, "Model is required"),
+    credentialId: z.string().min(1, "Credential is required"),
     systemPrompt: z.string().optional(),
     userPrompt: z.string().min(1, "User prompt is required"),
     mcpServerUrl: z
@@ -59,11 +63,16 @@ export const GrokDialog = ({
     const [isFetchingTools, setIsFetchingTools] = useState(false)
     const [toolError, setToolError] = useState("")
 
+    const { data: credentials,
+        isLoading: isLoadingCredentials
+    } = useCredentialsByType(CredentialType.GROK)
+
     const form = useForm<GrokFormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             variableName: defaultValues.variableName || "",
             model: defaultValues.model,
+            credentialId: defaultValues.credentialId || "",
             systemPrompt: defaultValues.systemPrompt || "",
             userPrompt: defaultValues.userPrompt || "",
             mcpServerUrl: defaultValues.mcpServerUrl || "",
@@ -81,7 +90,8 @@ export const GrokDialog = ({
                 userPrompt: defaultValues.userPrompt || "",
                 mcpServerUrl: defaultValues.mcpServerUrl || "",
                 mcpAuthToken: defaultValues.mcpAuthToken || "",
-                enabledTools: defaultValues.enabledTools || []
+                enabledTools: defaultValues.enabledTools || [],
+                credentialId: defaultValues.credentialId || "",
             })
             // Reset tools state when dialog opens
             setAvailableTools([])
@@ -166,6 +176,50 @@ export const GrokDialog = ({
                                     <FormDescription>
                                         Reference this node: {`{{${watchVariableName}.text}}`}
                                     </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="credentialId"
+                            render={({ field }) => (
+
+                                <FormItem>
+                                    <FormLabel>
+                                        xAI Credential
+                                    </FormLabel>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                        disabled={
+                                            isLoadingCredentials || !credentials?.length
+                                        }
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select a credential" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {credentials?.map((credential) => (
+                                                <SelectItem 
+                                                key={credential.id} 
+                                                value={credential.id}>
+                                                    <div className="flex items-center gap-2">
+                                                        <Image
+                                                            src="/logos/grok.svg"
+                                                            alt="xAI"
+                                                            width={16}
+                                                            height={16}
+                                                        />
+                                                        {credential.name}
+                                                    </div>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}

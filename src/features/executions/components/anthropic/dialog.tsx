@@ -18,8 +18,23 @@ import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import useSWR from "swr";
+import { useCredentialsByType } from "@/features/credentials/hooks/use-credentials"
+import { CredentialType } from "@/generated/prisma"
+import Image from "next/image"
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = async (url: string) => {
+    const res = await fetch(url);
+    const json = await res.json();
+
+    if (!res.ok) {
+        const error = new Error("API Error");
+        (error as any).info = json;
+        (error as any).status = res.status;
+        throw error;
+    }
+
+    return json;
+};
 
 const formSchema = z.object({
     variableName: z
@@ -31,6 +46,7 @@ const formSchema = z.object({
     model: z.string().optional(),
     systemPrompt: z.string().optional(),
     userPrompt: z.string().min(1, "User prompt is required"),
+    credentialId: z.string().min(1, "Credential is required"),
     mcpServerUrl: z
         .url({ error: "Please enter a valid URL (e.g., https://mcp.sanity.io)" })
         .optional()
@@ -57,6 +73,9 @@ export const AnthropicDialog = ({
     const [availableTools, setAvailableTools] = useState<{ name: string, description: string }[]>([])
     const [isFetchingTools, setIsFetchingTools] = useState(false)
     const [toolError, setToolError] = useState("")
+    const { data: credentials,
+        isLoading: isLoadingCredentials
+    } = useCredentialsByType(CredentialType.ANTHROPIC)
 
     const form = useForm<AnthropicFormValues>({
         resolver: zodResolver(formSchema),
@@ -67,7 +86,9 @@ export const AnthropicDialog = ({
             userPrompt: defaultValues.userPrompt || "",
             mcpServerUrl: defaultValues.mcpServerUrl || "",
             mcpAuthToken: defaultValues.mcpAuthToken || "",
-            enabledTools: defaultValues.enabledTools || []
+            enabledTools: defaultValues.enabledTools || [],
+            credentialId: defaultValues.credentialId || "",
+
         }
     })
 
@@ -80,7 +101,9 @@ export const AnthropicDialog = ({
                 userPrompt: defaultValues.userPrompt || "",
                 mcpServerUrl: defaultValues.mcpServerUrl || "",
                 mcpAuthToken: defaultValues.mcpAuthToken || "",
-                enabledTools: defaultValues.enabledTools || []
+                enabledTools: defaultValues.enabledTools || [],
+                credentialId: defaultValues.credentialId || "",
+
             })
             // Reset tools state when dialog opens
             setAvailableTools([])
@@ -91,8 +114,12 @@ export const AnthropicDialog = ({
     const watchVariableName = form.watch("variableName") || "myClaude"
     const currentMcpUrl = form.watch("mcpServerUrl")
     const currentMcpAuth = form.watch("mcpAuthToken")
+    const selectedCredentialId = form.watch("credentialId");
+
     const { data, isLoading: isFetchingModels, error } = useSWR(
-        open ? "/api/models/anthropic" : null,
+        open && selectedCredentialId
+            ? `/api/models/anthropic?credentialId=${selectedCredentialId}`
+            : null,
         fetcher
     );
 
@@ -172,6 +199,50 @@ export const AnthropicDialog = ({
 
                         <FormField
                             control={form.control}
+                            name="credentialId"
+                            render={({ field }) => (
+
+                                <FormItem>
+                                    <FormLabel>
+                                        Anthropic Credential
+                                    </FormLabel>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                        disabled={
+                                            isLoadingCredentials || !credentials?.length
+                                        }
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select a credential" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {credentials?.map((credential) => (
+                                                <SelectItem
+                                                    key={credential.id}
+                                                    value={credential.id}>
+                                                    <div className="flex items-center gap-2">
+                                                        <Image
+                                                            src="/logos/anthropic.svg"
+                                                            alt="Anthropic"
+                                                            width={16}
+                                                            height={16}
+                                                        />
+                                                        {credential.name}
+                                                    </div>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
                             name="model"
                             render={({ field }) => (
                                 <FormItem>
@@ -190,14 +261,20 @@ export const AnthropicDialog = ({
                                                 <div className="flex items-center justify-center p-4 text-sm text-muted-foreground">
                                                     <span className="animate-pulse">Loading Claude models...</span>
                                                 </div>
-                                            ) : availableModels?.length > 0 ? (
+                                            ) : error ? (
+                                                <div className="p-4 text-sm text-destructive">
+                                                    {(error as any).info?.error?.message || "Failed to load models"}
+                                                </div>
+                                            ) : availableModels?.length ? (
                                                 availableModels.map((modelId: string) => (
                                                     <SelectItem key={modelId} value={modelId}>
                                                         {modelId}
                                                     </SelectItem>
                                                 ))
                                             ) : (
-                                                <div className="p-4 text-sm text-destructive">No models found. Set your API Key</div>
+                                                <div className="p-4 text-sm text-destructive">
+                                                    No models found.
+                                                </div>
                                             )}
                                         </SelectContent>
                                     </Select>
