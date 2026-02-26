@@ -29,7 +29,8 @@ export const perplexityExecutor: NodeExecutor<perplexityData> = async ({
     nodeId,
     context,
     step,
-    publish
+    publish,
+    userId
 }) => {
 
     await publish(
@@ -77,7 +78,8 @@ export const perplexityExecutor: NodeExecutor<perplexityData> = async ({
     const credential = await step.run("get-credential", () => {
         return prisma.credential.findUnique({
             where: {
-                id: data.credentialId
+                id: data.credentialId,
+                userId
             }
         })
     })

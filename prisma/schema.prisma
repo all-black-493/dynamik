@@ -124,6 +124,11 @@ enum NodeType {
   GROK
   PERPLEXITY
   DEEPSEEK
+  DISCORD
+  SLACK
+  TELEGRAM
+  WHATSAPP
+  TIKTOK
 }
 
 model Node {
