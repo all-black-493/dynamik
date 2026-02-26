@@ -1,11 +1,16 @@
 import { InitialNode } from "@/components/initial-node";
 import { AnthropicNode } from "@/features/executions/components/anthropic/node";
 import { DeepseekNode } from "@/features/executions/components/deepseek/node";
+import { DiscordNode } from "@/features/executions/components/discord/node";
 import { GeminiNode } from "@/features/executions/components/gemini/node";
 import { GrokNode } from "@/features/executions/components/grok/node";
 import { HttpRequestNode } from "@/features/executions/components/http-request/node";
 import { OpenAINode } from "@/features/executions/components/openai/node";
 import { PerplexityNode } from "@/features/executions/components/perplexity/node";
+import { SlackNode } from "@/features/executions/components/slack/node";
+import { TelegramNode } from "@/features/executions/components/telegram/node";
+import { TiktokNode } from "@/features/executions/components/tiktok/node";
+import { WhatsappNode } from "@/features/executions/components/whatsapp/node";
 import GoogleFormTrigger from "@/features/triggers/components/google-form-trigger/node";
 import ManualTriggerNode from "@/features/triggers/components/manual-trigger/node";
 import MPESATrigger from "@/features/triggers/components/MPESA-trigger/node";
@@ -25,7 +30,12 @@ export const nodeComponents = {
     [NodeType.DEEPSEEK]:DeepseekNode,
     [NodeType.GROK]: GrokNode,
     [NodeType.PERPLEXITY]: PerplexityNode,
-    [NodeType.ANTHROPIC]:AnthropicNode
+    [NodeType.ANTHROPIC]:AnthropicNode,
+    [NodeType.DISCORD]:DiscordNode,
+    [NodeType.SLACK]:SlackNode,
+    [NodeType.TELEGRAM]:TelegramNode,
+    [NodeType.TIKTOK]:TiktokNode,
+    [NodeType.WHATSAPP]: WhatsappNode
 
 } as const satisfies NodeTypes
 

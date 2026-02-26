@@ -99,6 +99,36 @@ const executionNodes: NodeTypeOption[] = [
         label: "Anthropic",
         description: "Uses Claude AI to generate text",
         icon: "/logos/anthropic.svg"
+    },
+    {
+        type: NodeType.DISCORD,
+        label: "Discord",
+        description: "Send a Message to Discord",
+        icon: "/logos/discord.svg"
+    },
+    {
+        type: NodeType.TELEGRAM,
+        label: "Telegram",
+        description: "Send a Message to Telegram",
+        icon: "/logos/telegram.svg"
+    },
+    {
+        type: NodeType.TIKTOK,
+        label: "Tiktok",
+        description: "Send a Message to Tiktok",
+        icon: "/logos/tiktok.svg"
+    },
+    {
+        type: NodeType.SLACK,
+        label: "Slack",
+        description: "Send a Message to Slack",
+        icon: "/logos/slack.svg"
+    },
+    {
+        type: NodeType.WHATSAPP,
+        label: "Whatsapp",
+        description: "Send a Message to Whatsapp",
+        icon: "/logos/whatsapp.svg"
     }
 ]
 

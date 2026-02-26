@@ -15,6 +15,11 @@ import { grokChannel } from "./channels/grok";
 import { perplexityChannel } from "./channels/perplexity";
 import { anthropicChannel } from "./channels/anthropic";
 import { deepseekChannel } from "./channels/deepseek";
+import { tiktokChannel } from "./channels/tiktok";
+import { telegramChannel } from "./channels/telegram";
+import { slackChannel } from "./channels/slack";
+import { discordChannel } from "./channels/discord";
+import { whatsappChannel } from "./channels/whatsapp";
 
 
 export const executeWorkflow = inngest.createFunction(
@@ -35,7 +40,12 @@ export const executeWorkflow = inngest.createFunction(
             grokChannel(),
             perplexityChannel(),
             anthropicChannel(),
-            deepseekChannel()
+            deepseekChannel(),
+            tiktokChannel(),
+            telegramChannel(),
+            slackChannel(),
+            discordChannel(),
+            whatsappChannel(),
         ]
     },
 
@@ -61,6 +71,17 @@ export const executeWorkflow = inngest.createFunction(
                 return topologicalSort(workflow.nodes, workflow.connections)
             })
 
+        const userId = await step.run("find-user-id", async () => {
+            const workflow = await prisma.workflow.findUniqueOrThrow({
+                where: { id: workflowId },
+                select: {
+                    userId: true
+                }
+            })
+
+            return workflow.userId
+        })
+
         let context = event.data.initialData || {}
 
         for (const node of sorted_nodes) {
@@ -68,6 +89,7 @@ export const executeWorkflow = inngest.createFunction(
             context = await executor({
                 data: node.data as Record<string, unknown>,
                 nodeId: node.id,
+                userId,
                 context,
                 step,
                 publish

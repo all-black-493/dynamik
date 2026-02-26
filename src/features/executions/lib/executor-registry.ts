@@ -11,6 +11,8 @@ import { deepseekExecutor } from "../components/deepseek/executor";
 import { grokExecutor } from "../components/grok/executor";
 import { OpenAIExecutor } from "../components/openai/executor";
 import { perplexityExecutor } from "../components/perplexity/executor";
+import { discordExecutor } from "../components/discord/executor";
+import { slackExecutor } from "../components/slack/executor";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.INITIAL]: manualTriggerExecutor,
@@ -25,6 +27,11 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.GROK]:grokExecutor,
     [NodeType.OPENAI]:OpenAIExecutor,
     [NodeType.PERPLEXITY]:perplexityExecutor,
+    [NodeType.DISCORD]: discordExecutor,
+    [NodeType.SLACK]: slackExecutor,
+    [NodeType.TELEGRAM]:discordExecutor,
+    [NodeType.TIKTOK]: discordExecutor,
+    [NodeType.WHATSAPP]: discordExecutor
 }
 
 export const getExecutor = (type: NodeType): NodeExecutor => {
