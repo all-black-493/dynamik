@@ -13,6 +13,8 @@ import { OpenAIExecutor } from "../components/openai/executor";
 import { perplexityExecutor } from "../components/perplexity/executor";
 import { discordExecutor } from "../components/discord/executor";
 import { slackExecutor } from "../components/slack/executor";
+import { telegramExecutor } from "../components/telegram/executor";
+import { tiktokExecutor } from "../components/tiktok/executor";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.INITIAL]: manualTriggerExecutor,
@@ -29,8 +31,8 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.PERPLEXITY]:perplexityExecutor,
     [NodeType.DISCORD]: discordExecutor,
     [NodeType.SLACK]: slackExecutor,
-    [NodeType.TELEGRAM]:discordExecutor,
-    [NodeType.TIKTOK]: discordExecutor,
+    [NodeType.TELEGRAM]:telegramExecutor,
+    [NodeType.TIKTOK]: tiktokExecutor,
     [NodeType.WHATSAPP]: discordExecutor
 }
 

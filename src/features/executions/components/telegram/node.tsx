@@ -10,10 +10,9 @@ import { TelegramDialog, TelegramFormValues } from "./dialog"
 
 type telegramNodeData = {
     variableName?: string;
-    model?: string ;
-    systemPrompt?: string;
-    userPrompt?: string;
-
+    webhookUrl?: string;
+    content?: string;
+    chat_id?: string;
 }
 
 type TelegramNodeType = Node<telegramNodeData>
@@ -49,8 +48,8 @@ export const TelegramNode = memo((props: NodeProps<TelegramNodeType>) => {
     }
 
     const nodeData = props.data
-    const description = nodeData?.userPrompt
-        ? `${nodeData.model}: ${nodeData.userPrompt.slice(0, 50)} ...`
+    const description = nodeData?.content
+        ? `Send ${nodeData.content.slice(0, 50)} ...`
         : "Not configured"
 
 

@@ -54,7 +54,16 @@ const credentialTypeOptions = [
         label: "Perplexity",
         logo: "/logos/perplexity.svg"
     },
-
+    {
+        value: CredentialType.TIKTOK_CLIENT_KEY,
+        label: "Tiktok Client Key",
+        logo: "/logos/tiktok.svg"
+    },
+    {
+        value: CredentialType.TIKTOK_CLIENT_SECRET,
+        label: "Tiktok Client Secret",
+        logo: "/logos/tiktok.svg"
+    },
 ]
 
 interface CredentialFormProps {

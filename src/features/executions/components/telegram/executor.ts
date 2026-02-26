@@ -1,12 +1,9 @@
 import type { NodeExecutor } from "@/features/executions/lib/types";
+import { telegramChannel } from "@/inngest/channels/telegram";
+import Handlebars from "handlebars";
+import { decode } from "html-entities";
 import { NonRetriableError } from "inngest";
-import Handlebars from "handlebars"
-import { geminiChannel } from "@/inngest/channels/gemini";
-import { createGoogleGenerativeAI } from "@ai-sdk/google"
-import { generateText } from "ai"
-import { createMCPClient } from '@ai-sdk/mcp';
-import prisma from "@/lib/db";
-
+import ky from "ky";
 
 Handlebars.registerHelper("json", (context) => {
     const stringified = JSON.stringify(context, null, 2)
@@ -14,155 +11,107 @@ Handlebars.registerHelper("json", (context) => {
     return safeString
 })
 
-type geminiData = {
+type telegramData = {
     variableName?: string;
-    model?: string;
-    systemPrompt?: string;
-    userPrompt?: string;
-    mcpServerUrl?: string;
-    mcpAuthToken?: string;
-    enabledTools?: string[];
-    credentialId?: string
+    webhookUrl?: string;
+    content?: string;
+    chat_id?: string
 
 }
 
-export const geminiExecutor: NodeExecutor<geminiData> = async ({
+export const telegramExecutor: NodeExecutor<telegramData> = async ({
     data,
     nodeId,
     context,
-    userId,
     step,
     publish
 }) => {
 
     await publish(
-        geminiChannel().status({
+        telegramChannel().status({
             nodeId,
             status: "loading"
         })
     )
 
-    if (!data.variableName) {
+    if (!data.content) {
         await publish(
-            geminiChannel().status({
+            telegramChannel().status({
                 nodeId,
                 status: "error"
             })
         )
-        throw new NonRetriableError("Gemini node: Variable name is missing")
+
+        throw new NonRetriableError("Telegram node: Message content is missing")
+
     }
 
-    if (!data.credentialId) {
-        await publish(
-            geminiChannel().status({
-                nodeId,
-                status: "error"
-            })
-        )
-        throw new NonRetriableError("Gemini node: Credential is required")
-    }
-
-    if (!data.userPrompt) {
-        await publish(
-            geminiChannel().status({
-                nodeId,
-                status: "error"
-            })
-        )
-    }
-
-    const systemPrompt = data.systemPrompt
-        ? Handlebars.compile(data.systemPrompt)(context)
-        : "You are a helpful assistant"
-
-    const userPrompt = Handlebars.compile(data.userPrompt)(context)
- 
-    const credential = await step.run("get-credential", () => {
-        return prisma.credential.findUnique({
-            where: {
-                id: data.credentialId,
-                userId
-            }
-        })
-    })
-
-    if (!credential) {
-        throw new NonRetriableError("Gemini node: Credential not found")
-    }
-    const google = createGoogleGenerativeAI({
-        apiKey: credential.value
-    })
-
-    let mcpClient;
-    let finalTools = {}
-
-    if (data.mcpServerUrl) {
-        mcpClient = await createMCPClient({
-            transport: {
-                type: 'http',
-                url: data.mcpServerUrl,
-                headers: data.mcpAuthToken ? { Authorization: `Bearer ${data.mcpAuthToken}` } : {}
-            }
-        });
-
-        const allAvailableTools = await mcpClient.tools();
-
-        if (data.enabledTools && data.enabledTools.length > 0) {
-            finalTools = Object.fromEntries(
-                Object.entries(allAvailableTools).filter(([name]) =>
-                    data.enabledTools!.includes(name)
-                )
-            );
-        } else {
-            // If no list is provided, perhaps default to no tools for safety
-            finalTools = {};
-        }
-
-        console.log("[MCP TOOLS: ]", finalTools)
-    }
-
-
+    const rawContent = Handlebars.compile(data.content)(context)
+    const content = decode(rawContent)
 
     try {
-        const { steps } = await step.ai.wrap(
-            "gemini-generate-text",
-            generateText,
-            {
-                model: google(data.model! || "gemini-2.5-pro"),
-                system: systemPrompt,
-                prompt: userPrompt,
-                experimental_telemetry: {
-                    isEnabled: true,
-                    recordInputs: true,
-                    recordOutputs: true,
-                },
-                // tools: finalTools,
-                maxRetries: 2
+
+        const result = await step.run("telegram-webhook", async () => {
+
+            if (!data.webhookUrl) {
+                await publish(
+                    telegramChannel().status({
+                        nodeId,
+                        status: "error"
+                    })
+                )
+                throw new NonRetriableError("Telegram node: Endpoint URL is missing")
             }
-        )
 
-        const text = steps[0].content[0].type === "text"
-            ? steps[0].content[0].text
-            : "";
+            if (!data.chat_id) {
+                await publish(
+                    telegramChannel().status({
+                        nodeId,
+                        status: "error"
+                    })
+                )
+                throw new NonRetriableError("Telegram node: Chat ID is missing")
+            }
 
-        if (mcpClient) await mcpClient.close();
+            await ky.post(data.webhookUrl, {
+                json: {
+                    chat_id: data.chat_id,
+                    text: content,
+                }
+            })
+
+            if (!data.variableName) {
+                await publish(
+                    telegramChannel().status({
+                        nodeId,
+                        status: "error"
+                    })
+                )
+                throw new NonRetriableError("Telegram node: Variable name is missing")
+            }
+
+            return {
+                ...context,
+                [data.variableName]: {
+                    telegramMessageSent: true,
+                    messageContent: content.slice(0, 2000)
+                }
+            }
+        })
 
         await publish(
-            geminiChannel().status({
+            telegramChannel().status({
                 nodeId,
                 status: "success"
             })
         )
 
-        return {
-            ...context,
-            [data.variableName]: {
-                text
-            }
-        }
+        return result
+
+
     } catch (error) {
         await publish(
-            geminiChannel().status({
+            telegramChannel().status({
                 nodeId,
                 status: "error"
             })

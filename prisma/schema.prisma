@@ -96,6 +96,8 @@ enum CredentialType {
   DEEPSEEK
   PERPLEXITY
   GEMINI
+  TIKTOK_CLIENT_KEY
+  TIKTOK_CLIENT_SECRET
 }
 
 model Workflow {

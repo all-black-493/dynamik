@@ -119,6 +119,9 @@ const credentialLogos: Record<CredentialType, string> = {
     [CredentialType.DEEPSEEK]: "/logos/deepseek.svg",
     [CredentialType.PERPLEXITY]: "/logos/perplexity.svg",
     [CredentialType.GROK]: "/logos/grok.svg",
+    [CredentialType.TIKTOK_CLIENT_KEY]: "/logos/tiktok.svg",
+    [CredentialType.TIKTOK_CLIENT_SECRET]: "/logos/tiktok.svg"
+
 }
 export const CredentialItem = ({
     data
