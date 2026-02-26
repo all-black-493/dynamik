@@ -3,10 +3,12 @@
 import React from 'react'
 import {
     CreditCardIcon,
+    FileTextIcon,
     FolderOpenIcon,
     HistoryIcon,
     KeyIcon,
     LogOutIcon,
+    Shield,
     StarIcon
 } from "lucide-react"
 import Image from "next/image"
@@ -51,6 +53,7 @@ const menuItems = [
 ]
 
 
+
 const AppSidebar = () => {
 
     const router = useRouter()
@@ -63,7 +66,7 @@ const AppSidebar = () => {
                     <SidebarMenuButton asChild className='gap-x-4 h-10 px-4'>
                         <Link href="/" prefetch>
                             <Image src="/logos/logo.svg" alt='logo' height={30} width={30} />
-                            <span className='font-semibold text-sm'>Dynamiq</span>
+                            <span className='font-semibold text-sm'>dynamiq</span>
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -162,6 +165,32 @@ const AppSidebar = () => {
                         >
                             <LogOutIcon className='h-4 w-4' />
                             <span>Log Out</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+
+                    <SidebarMenuItem>
+                        <SidebarMenuButton
+                            tooltip="Terms of Service"
+                            className='gap-x-4 h-10 px-4'
+                            asChild
+                        >
+                            <Link href="/terms" prefetch>
+                                <FileTextIcon className='h-4 w-4' />
+                                <span>Terms Of Service</span>
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+
+                    <SidebarMenuItem>
+                        <SidebarMenuButton
+                            tooltip="Privacy Policy"
+                            className='gap-x-4 h-10 px-4'
+                            asChild
+                        >
+                            <Link href="/privacy-policy" prefetch>
+                                <Shield className='h-4 w-4' />
+                                <span>Privacy Policy</span>
+                            </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
 

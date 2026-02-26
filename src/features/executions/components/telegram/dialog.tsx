@@ -24,12 +24,13 @@ const formSchema = z.object({
         .regex(/^[A-Za-z_$][A-Za-z0-9_$]*$/, {
             error: "Variable name must start with a letter or underscore and contain only letters, numbers, and underscores"
         }),
-    userName: z.string().optional(),
     content: z
         .string()
-        .min(1, "Message content is required")
-        .max(2000, "Telegram messages cannot exceed 2000 characters"),
-    webhookUrl: z.string().min(1, "Webhook URL is required")
+        .min(1, "Message content is required"),
+    // .max(2000, "Telegram messages cannot exceed 2000 characters"),
+    webhookUrl: z.string().min(1, "Webhook URL is required"),
+    chat_id: z.string()
+
 })
 
 export type TelegramFormValues = z.infer<typeof formSchema>
@@ -52,9 +53,9 @@ export const TelegramDialog = ({
         resolver: zodResolver(formSchema),
         defaultValues: {
             variableName: defaultValues.variableName || "",
-            userName: defaultValues.userName || "",
             content: defaultValues.content || "",
-            webhookUrl: defaultValues.webhookUrl || ""
+            webhookUrl: defaultValues.webhookUrl || "",
+            chat_id: defaultValues.chat_id || ""
         }
     })
 
@@ -62,16 +63,14 @@ export const TelegramDialog = ({
         if (open) {
             form.reset({
                 variableName: defaultValues.variableName || "",
-                userName: defaultValues.userName || "",
                 content: defaultValues.content || "",
-                webhookUrl: defaultValues.webhookUrl || ""
+                webhookUrl: defaultValues.webhookUrl || "",
+                chat_id: defaultValues.chat_id || ""
             })
         }
     }, [open, defaultValues, form])
 
     const watchVariableName = form.watch("variableName") || "telegramVar"
-
-
 
     const handleSubmit = (values: TelegramFormValues) => {
         onSubmit(values)
@@ -127,10 +126,29 @@ export const TelegramDialog = ({
                                         Webhook URL
                                     </FormLabel>
                                     <FormControl>
-                                        <Input placeholder="https://telegram.com/api/webhooks/..." {...field} />
+                                        <Input placeholder="https://api.telegram.org/bot<YOUR_BOT_TOKEN>/sendMessage/..." {...field} />
                                     </FormControl>
                                     <FormDescription>
-                                        Get this from Telegram: Channel Settings → Integrations → Webhooks
+                                        Get this from Telegram: Search @BotFather and open the verified bot → Tap Start → Send the command /newbot and follow the instructions
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* https://api.telegram.org/bot8681230656:AAE4H1yC7Ks1Td6FsCF2p_CS_EPJceUhVpg/sendMessage */}
+
+                        <FormField
+                            control={form.control}
+                            name="chat_id"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Chat ID</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} placeholder="1234567890" />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Enter the Telegram Chat ID where messages should be sent. To get this, open Telegram and search for <strong>@userinfobot</strong>, start the bot, and copy the ID it replies with. For group or channel IDs you may need to add an ID bot there first.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -158,25 +176,6 @@ export const TelegramDialog = ({
                             )}
                         />
 
-                        <FormField
-                            control={form.control}
-                            name="userName"
-                            render={({ field }) => (
-
-                                <FormItem>
-                                    <FormLabel>
-                                        Bot Username (Optional)
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Workflow Bot" {...field} />
-                                    </FormControl>
-                                    <FormDescription>
-                                        Override the webhook's default username
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
 
                         <DialogFooter className="mt-6">
                             <Button type="submit">Save Configuration</Button>
