@@ -1,0 +1,12 @@
+import { PAGINATION } from "@/config/constants"
+import { parseAsInteger } from "nuqs/server"
+
+export const executionsParams = {
+    page: parseAsInteger
+        .withDefault(PAGINATION.DEFAULT_PAGE)
+        .withOptions({ clearOnDefault: true }),
+    page_size: parseAsInteger
+        .withDefault(PAGINATION.DEFAULT_PAGE_SIZE)
+        .withOptions({ clearOnDefault: true }),
+    
+}
