@@ -6,6 +6,7 @@ import { createAnthropic } from "@ai-sdk/anthropic"
 import { generateText } from "ai"
 import { createMCPClient } from '@ai-sdk/mcp';
 import prisma from "@/lib/db";
+import { decrypt } from "@/lib/encryption";
 
 
 Handlebars.registerHelper("json", (context) => {
@@ -90,7 +91,7 @@ export const anthropicExecutor: NodeExecutor<anthropicData> = async ({
     }
 
     const anthropic = createAnthropic({
-        apiKey: credential.value
+        apiKey: decrypt(credential.value)
     })
 
     let mcpClient;

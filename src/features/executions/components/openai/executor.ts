@@ -6,6 +6,7 @@ import { generateText } from "ai";
 import Handlebars from "handlebars";
 import { NonRetriableError } from "inngest";
 import prisma from "@/lib/db";
+import { decrypt } from "@/lib/encryption";
 
 
 
@@ -90,7 +91,7 @@ export const OpenAIExecutor: NodeExecutor<OpenAIData> = async ({
         throw new NonRetriableError("OpenAI node: Credential not found")
     }
     const openai = createOpenAI({
-        apiKey: credential.value
+        apiKey: decrypt(credential.value)
     })
 
     let mcpClient;

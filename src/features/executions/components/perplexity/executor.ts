@@ -6,6 +6,7 @@ import { createPerplexity } from "@ai-sdk/perplexity"
 import { generateText } from "ai"
 import { createMCPClient } from '@ai-sdk/mcp';
 import prisma from "@/lib/db";
+import { decrypt } from "@/lib/encryption";
 
 Handlebars.registerHelper("json", (context) => {
     const stringified = JSON.stringify(context, null, 2)
@@ -88,7 +89,7 @@ export const perplexityExecutor: NodeExecutor<perplexityData> = async ({
         throw new NonRetriableError("Perplexity node: Credential not found")
     }
     const perplexity = createPerplexity({
-        apiKey: credential.value
+        apiKey: decrypt(credential.value)
     })
 
     let mcpClient;
