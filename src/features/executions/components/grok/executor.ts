@@ -6,6 +6,7 @@ import { createXai } from "@ai-sdk/xai"
 import { generateText } from "ai"
 import { createMCPClient } from '@ai-sdk/mcp';
 import prisma from "@/lib/db";
+import { decrypt } from "@/lib/encryption";
 
 
 Handlebars.registerHelper("json", (context) => {
@@ -90,7 +91,7 @@ export const grokExecutor: NodeExecutor<grokData> = async ({
     }
 
     const grok = createXai({
-        apiKey: credential.value
+        apiKey: decrypt(credential.value)
     })
 
     let mcpClient;

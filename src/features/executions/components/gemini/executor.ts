@@ -6,6 +6,7 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import { generateText } from "ai"
 import { createMCPClient } from '@ai-sdk/mcp';
 import prisma from "@/lib/db";
+import { decrypt } from "@/lib/encryption";
 
 
 Handlebars.registerHelper("json", (context) => {
@@ -90,7 +91,7 @@ export const geminiExecutor: NodeExecutor<geminiData> = async ({
         throw new NonRetriableError("Gemini node: Credential not found")
     }
     const google = createGoogleGenerativeAI({
-        apiKey: credential.value
+        apiKey: decrypt(credential.value)
     })
 
     let mcpClient;
