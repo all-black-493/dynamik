@@ -6,11 +6,11 @@ import { memo, useState } from "react"
 import useNodeStatus from "../../hooks/use-node-status"
 import { BaseExecutionNode } from "../base-execution-node"
 import { geminiRealtimeToken } from "./actions"
-import { AVAILABLE_MODELS, GeminiDialog, GeminiFormValues } from "./dialog"
+import { GeminiDialog, GeminiFormValues } from "./dialog"
 
 type geminiNodeData = {
     variableName?: string;
-    model?: "gemini-1.5-flash" | "gemini-1.5-flash-8b" | "gemini-1.5-pro" | "gemini-1.0-pro" | "gemini-pro" ;
+    model?: string ;
     systemPrompt?: string;
     userPrompt?: string;
 
