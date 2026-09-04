@@ -14,8 +14,8 @@ export type CredentialField = {
  *
  * Most providers authenticate with a single API key, which is stored in
  * `Credential.value` as-is. Some need several parts: Salesforce wants an
- * instance URL alongside a consumer key and secret, and Odoo will want a
- * database name and login too. Those are stored as a JSON object in the same
+ * instance URL alongside a consumer key and secret, and Odoo needs a database
+ * name and login too. Those are stored as a JSON object in the same
  * encrypted column, so multi-part credentials cost no schema change and single
  * key providers keep working untouched.
  */
@@ -57,6 +57,22 @@ export const credentialFields: Partial<Record<CredentialType, CredentialField[]>
             label: "SSL",
             placeholder: "require",
             description: "require, or disable for a local database"
+        }
+    ],
+    [CredentialType.ODOO]: [
+        {
+            key: "url",
+            label: "Instance URL",
+            placeholder: "https://mycompany.odoo.com",
+            description: "No trailing slash"
+        },
+        { key: "db", label: "Database", placeholder: "mycompany" },
+        { key: "username", label: "Username", placeholder: "admin@mycompany.com" },
+        {
+            key: "apiKey",
+            label: "API Key",
+            description: "Preferences, then Account Security, then New API Key",
+            secret: true
         }
     ]
 }

@@ -103,6 +103,7 @@ enum CredentialType {
   SALESFORCE
   HUBSPOT
   POSTGRES
+  ODOO
 }
 
 model Workflow {
@@ -147,6 +148,7 @@ enum NodeType {
   WAIT
   POSTGRES
   DISPLAY
+  ODOO
 }
 
 model Node {
