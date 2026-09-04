@@ -5,6 +5,7 @@ import { ExecutionStatus, NodeType } from "@/generated/prisma";
 import { getExecutor } from "@/features/executions/lib/executor-registry";
 import { toOutcome } from "@/features/executions/lib/types";
 import { createExecutionPlan } from "@/features/executions/lib/execution-plan";
+import { scopeStep } from "@/features/executions/lib/scoped-step";
 import { httpRequestChannel } from "./channels/http-request";
 import { manualTriggerChannel } from "./channels/manual-trigger";
 import { googleFormTriggerChannel } from "./channels/google-form-trigger";
@@ -24,6 +25,7 @@ import { whatsappChannel } from "./channels/whatsapp";
 import { salesforceChannel } from "./channels/salesforce";
 import { hubspotChannel } from "./channels/hubspot";
 import { ifChannel } from "./channels/if";
+import { loopChannel } from "./channels/loop";
 
 
 export const executeWorkflow = inngest.createFunction(
@@ -63,6 +65,7 @@ export const executeWorkflow = inngest.createFunction(
             salesforceChannel(),
             hubspotChannel(),
             ifChannel(),
+            loopChannel(),
         ]
     },
 
@@ -136,6 +139,71 @@ export const executeWorkflow = inngest.createFunction(
 
             const outcome = toOutcome(result)
             context = outcome.context
+
+            if (outcome.loop) {
+                const { output, items, as } = outcome.loop
+                const body = plan.subgraphFrom(node.id, output)
+                const outerKeys = new Set(Object.keys(context))
+                const results: Record<string, unknown>[] = []
+
+                for (let index = 0; index < items.length; index++) {
+                    // Each pass gets a fresh plan so branching inside the body
+                    // works, and a fresh view of the outer context so one
+                    // iteration cannot leak into the next.
+                    const bodyPlan = createExecutionPlan(body.nodes, body.connections)
+
+                    let iterationContext: Record<string, unknown> = {
+                        ...context,
+                        [as]: {
+                            item: items[index],
+                            index,
+                            total: items.length,
+                            isFirst: index === 0,
+                            isLast: index === items.length - 1
+                        }
+                    }
+
+                    for (const bodyNode of bodyPlan.sorted) {
+                        if (!bodyPlan.isActive(bodyNode.id)) {
+                            bodyPlan.skip(bodyNode.id)
+                            continue
+                        }
+
+                        const bodyResult = await getExecutor(bodyNode.type as NodeType)({
+                            data: bodyNode.data as Record<string, unknown>,
+                            nodeId: bodyNode.id,
+                            userId,
+                            context: iterationContext,
+                            // Step ids are namespaced per iteration, otherwise
+                            // the second pass would be handed the first pass's
+                            // memoized result instead of doing the work.
+                            step: scopeStep(step, `${node.id}-${index}`),
+                            publish
+                        })
+
+                        const bodyOutcome = toOutcome(bodyResult)
+                        iterationContext = bodyOutcome.context
+                        bodyPlan.advance(bodyNode.id, bodyOutcome.outputs)
+                    }
+
+                    // Only what this pass produced, so the collected results are
+                    // the loop's output rather than a copy of the whole context.
+                    results.push(
+                        Object.fromEntries(
+                            Object.entries(iterationContext)
+                                .filter(([key]) => !outerKeys.has(key))
+                        )
+                    )
+                }
+
+                context = {
+                    ...context,
+                    [as]: {
+                        count: results.length,
+                        results
+                    }
+                }
+            }
 
             plan.advance(node.id, outcome.outputs)
         }

@@ -46,7 +46,16 @@ export const topologicalSort = <TNode extends SortableNode>(
 
     } catch (error) {
         if (error instanceof Error && error.message.includes("Cyclic")) {
-            throw new Error("Workflow contains a cycle")
+            // toposort names the node it got stuck on, which is the only
+            // actionable part. Without it the user is told their workflow has a
+            // cycle and left to find it by eye.
+            const culprit = error.message.match(/node was:\s*"?([^"\n]+)"?/)?.[1]
+
+            throw new Error(
+                culprit
+                    ? `Workflow contains a cycle involving node ${culprit}. A Loop node does not need a connection back into it: everything on its "each" branch already repeats.`
+                    : "Workflow contains a cycle"
+            )
         }
         throw error
     }

@@ -24,11 +24,27 @@ export const DEFAULT_OUTPUT = "main"
  */
 const OUTCOME = Symbol.for("dynamik.node-outcome")
 
+/**
+ * Asks the engine to run one output's downstream nodes once per item.
+ *
+ * A node cannot do this itself: it has no view of the graph and no way to
+ * invoke other executors. So it describes the iteration and the engine carries
+ * it out.
+ */
+export type NodeLoop = {
+    /** The output whose downstream nodes form the body. */
+    output: string
+    items: unknown[]
+    /** Context key holding the current item during each pass. */
+    as: string
+}
+
 export type NodeOutcome = {
     [OUTCOME]: true
     context: WorkflowContext
     /** Names of the outputs to follow. Downstream nodes on other outputs are skipped. */
     outputs: string[]
+    loop?: NodeLoop
 }
 
 /**
@@ -46,14 +62,29 @@ export const branch = (
     outputs
 })
 
+/**
+ * Returned by a node that iterates. The body output is driven by the engine
+ * rather than activated normally, so it is not listed in `outputs`.
+ */
+export const loopOver = (
+    context: WorkflowContext,
+    loop: NodeLoop,
+    outputs: string[]
+): NodeOutcome => ({
+    [OUTCOME]: true,
+    context,
+    outputs,
+    loop
+})
+
 export const isNodeOutcome = (value: unknown): value is NodeOutcome =>
     typeof value === "object" && value !== null && OUTCOME in value
 
 export const toOutcome = (
     result: WorkflowContext | NodeOutcome
-): { context: WorkflowContext; outputs: string[] } =>
+): { context: WorkflowContext; outputs: string[]; loop?: NodeLoop } =>
     isNodeOutcome(result)
-        ? { context: result.context, outputs: result.outputs }
+        ? { context: result.context, outputs: result.outputs, loop: result.loop }
         : { context: result, outputs: [DEFAULT_OUTPUT] }
 
 export type NodeExecutor<TData = Record<string, unknown>> = (

@@ -5,7 +5,8 @@ import { useReactFlow } from "@xyflow/react"
 import {
     GitBranchIcon,
     GlobeIcon,
-    MousePointerIcon
+    MousePointerIcon,
+    RepeatIcon
 } from "lucide-react"
 import { useCallback } from "react"
 import { toast } from "sonner"
@@ -148,6 +149,12 @@ const executionNodes: NodeTypeOption[] = [
         label: "If",
         description: "Branch on a Condition",
         icon: GitBranchIcon
+    },
+    {
+        type: NodeType.LOOP,
+        label: "Loop",
+        description: "Repeat Nodes for each Item in a List",
+        icon: RepeatIcon
     }
 ]
 

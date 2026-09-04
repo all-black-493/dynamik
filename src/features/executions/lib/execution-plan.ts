@@ -35,11 +35,25 @@ export const createExecutionPlan = <TNode extends SortableNode>(
         outgoing.set(connection.fromNodeId, edges)
     }
 
+    const incoming = new Map<string, PlanConnection[]>()
+    for (const connection of connections) {
+        const edges = incoming.get(connection.toNodeId) ?? []
+        edges.push(connection)
+        incoming.set(connection.toNodeId, edges)
+    }
+
     const targeted = new Set(connections.map((connection) => connection.toNodeId))
     const active = new Set(
         sorted.filter((node) => !targeted.has(node.id)).map((node) => node.id)
     )
 
+    // Which specific inbound edges delivered control. A Merge node that must
+    // wait for every input needs this, not just the fact that one arrived.
+    const arrived = new Map<string, Set<string>>()
+    const edgeKey = (connection: PlanConnection) =>
+        `${connection.fromNodeId}:${connection.fromOutput}`
+
+    const byId = new Map(sorted.map((node) => [node.id, node]))
     const skipped: string[] = []
 
     return {
@@ -57,9 +71,59 @@ export const createExecutionPlan = <TNode extends SortableNode>(
             for (const connection of outgoing.get(nodeId) ?? []) {
                 if (outputs.includes(connection.fromOutput)) {
                     active.add(connection.toNodeId)
+
+                    const seen = arrived.get(connection.toNodeId) ?? new Set<string>()
+                    seen.add(edgeKey(connection))
+                    arrived.set(connection.toNodeId, seen)
                 }
             }
         },
+
+        /** True when every inbound edge of a node has delivered control. */
+        allInputsArrived: (nodeId: string) => {
+            const edges = incoming.get(nodeId) ?? []
+            if (edges.length === 0) return true
+
+            const seen = arrived.get(nodeId)
+            return edges.every((edge) => seen?.has(edgeKey(edge)))
+        },
+
+        /**
+         * Everything downstream of one output, as a self-contained graph.
+         *
+         * This is the body of a loop: the nodes hanging off the iterating
+         * output, plus only the edges internal to that set, so the body can be
+         * planned and run on its own. The originating node is excluded, so an
+         * edge pointing back at it simply drops out rather than forming a cycle.
+         */
+        subgraphFrom: (nodeId: string, output: string) => {
+            const bodyIds = new Set<string>()
+            const queue = (outgoing.get(nodeId) ?? [])
+                .filter((connection) => connection.fromOutput === output)
+                .map((connection) => connection.toNodeId)
+
+            while (queue.length) {
+                const current = queue.shift() as string
+                if (current === nodeId || bodyIds.has(current)) continue
+
+                bodyIds.add(current)
+
+                for (const connection of outgoing.get(current) ?? []) {
+                    queue.push(connection.toNodeId)
+                }
+            }
+
+            return {
+                nodes: sorted.filter((node) => bodyIds.has(node.id)),
+                connections: connections.filter(
+                    (connection) =>
+                        bodyIds.has(connection.fromNodeId) && bodyIds.has(connection.toNodeId)
+                ),
+                nodeIds: [...bodyIds]
+            }
+        },
+
+        getNode: (nodeId: string) => byId.get(nodeId),
 
         getSkipped: () => [...skipped]
     }
