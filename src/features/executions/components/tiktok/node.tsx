@@ -10,10 +10,14 @@ import { TiktokDialog, TiktokFormValues } from "./dialog"
 
 type tiktokNodeData = {
     variableName?: string;
-    model?: string;
-    systemPrompt?: string;
-    userPrompt?: string;
-
+    credentialId?: string;
+    postMode?: "INBOX" | "DIRECT_POST";
+    videoUrl?: string;
+    title?: string;
+    privacyLevel?: string;
+    disableComment?: boolean;
+    disableDuet?: boolean;
+    disableStitch?: boolean;
 }
 
 type TiktokNodeType = Node<tiktokNodeData>
@@ -49,8 +53,8 @@ export const TiktokNode = memo((props: NodeProps<TiktokNodeType>) => {
     }
 
     const nodeData = props.data
-    const description = nodeData?.userPrompt
-        ? `${nodeData.model}: ${nodeData.userPrompt.slice(0, 50)} ...`
+    const description = nodeData?.videoUrl
+        ? `${nodeData.postMode === "DIRECT_POST" ? "Publish" : "Draft"}: ${nodeData.videoUrl.slice(0, 40)} ...`
         : "Not configured"
 
 
