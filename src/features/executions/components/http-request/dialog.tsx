@@ -146,7 +146,7 @@ export const HttpRequestDialog = ({
                                     </FormControl>
 
                                     <FormDescription>
-                                        Use this name to reference the result in other nodes:{" "}
+                                        Reference it as{" "}
                                         {`{{${watchVariableName}.httpResponse.data}}`}
                                     </FormDescription>
 
@@ -171,7 +171,7 @@ export const HttpRequestDialog = ({
                                     </FormControl>
 
                                     <FormDescription>
-                                        Static URL or use {"{{variables}}"} for simple values or {"{{json variable}}"} to stringify objects
+                                        Supports {"{{variables}}"}.
                                     </FormDescription>
 
                                     <FormMessage />
@@ -195,7 +195,7 @@ export const HttpRequestDialog = ({
                                         </FormControl>
 
                                         <FormDescription>
-                                            Static URL or use {"{{variables}}"} for simple values or {"{{json variable}}"} to stringify objects
+                                            Supports {"{{variables}}"}.
                                         </FormDescription>
 
                                         <FormMessage />

@@ -75,8 +75,8 @@ export const LoopDialog = ({
                 <DialogHeader>
                     <DialogTitle>Loop Configuration</DialogTitle>
                     <DialogDescription>
-                        Everything connected to the each branch runs once per item, then the
-                        done branch runs once. No connection back into this node is needed.
+                        The each branch repeats per item, then done runs once. No return
+                        connection needed.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -96,8 +96,7 @@ export const LoopDialog = ({
                                         />
                                     </FormControl>
                                     <FormDescription>
-                                        A path to a list in the workflow data, written without braces.
-                                        The node fails if it does not find a list there.
+                                        Path to a list, written without braces.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -114,8 +113,7 @@ export const LoopDialog = ({
                                         <Input {...field} placeholder="myLoop" className="font-mono" />
                                     </FormControl>
                                     <FormDescription>
-                                        Inside the loop: {`{{${watchVariableName}.item}}`}, plus index,
-                                        total, isFirst and isLast. After it:{" "}
+                                        Inside: {`{{${watchVariableName}.item}}`}. After:{" "}
                                         {`{{${watchVariableName}.results}}`}
                                     </FormDescription>
                                     <FormMessage />
@@ -133,8 +131,7 @@ export const LoopDialog = ({
                                         <Input {...field} placeholder="100" className="font-mono" />
                                     </FormControl>
                                     <FormDescription>
-                                        Defaults to 100, capped at 1000, so a wrong path cannot turn
-                                        into a very long run
+                                        Defaults to 100, capped at 1000
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>

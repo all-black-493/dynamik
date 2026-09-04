@@ -293,8 +293,7 @@ export const HubspotDialog = ({
                                             />
                                         </FormControl>
                                         <FormDescription>
-                                            The whole search request, so every filter, sort and paging option
-                                            stays available. Leave blank to match everything.
+                                            The full search request. Blank matches everything.
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>
@@ -471,8 +470,7 @@ export const HubspotDialog = ({
                                                 />
                                             </FormControl>
                                             <FormDescription>
-                                                Relative to api.hubapi.com, so marketing, files and automation
-                                                endpoints are reachable, not only the CRM
+                                                Relative to api.hubapi.com, not just the CRM
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>

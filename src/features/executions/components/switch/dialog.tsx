@@ -85,8 +85,7 @@ export const SwitchDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} 
                 <DialogHeader>
                     <DialogTitle>Switch Configuration</DialogTitle>
                     <DialogDescription>
-                        One output per rule. Each rule you add gives this node another
-                        connection point on the canvas.
+                        One output per rule.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -152,8 +151,7 @@ export const SwitchDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} 
                                     <div className="space-y-1 pr-6">
                                         <FormLabel>Take every matching rule</FormLabel>
                                         <FormDescription>
-                                            Off, the run follows the first rule that matches. On, it
-                                            follows all of them at once.
+                                            Off, the first match wins.
                                         </FormDescription>
                                     </div>
                                     <FormControl>
@@ -171,7 +169,7 @@ export const SwitchDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} 
                                     <div className="space-y-1 pr-6">
                                         <FormLabel>Add an else output</FormLabel>
                                         <FormDescription>
-                                            Where the run goes when no rule matches. Off, it stops here.
+                                            Where a run goes when nothing matches.
                                         </FormDescription>
                                     </div>
                                     <FormControl>

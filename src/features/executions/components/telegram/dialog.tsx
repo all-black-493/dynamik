@@ -129,7 +129,7 @@ export const TelegramDialog = ({
                                         <Input placeholder="https://api.telegram.org/bot<YOUR_BOT_TOKEN>/sendMessage/..." {...field} />
                                     </FormControl>
                                     <FormDescription>
-                                        Get this from Telegram: Search @BotFather and open the verified bot → Tap Start → Send the command /newbot and follow the instructions
+                                        From @BotFather, using /newbot.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -148,7 +148,7 @@ export const TelegramDialog = ({
                                         <Input {...field} placeholder="1234567890" />
                                     </FormControl>
                                     <FormDescription>
-                                        Enter the Telegram Chat ID where messages should be sent. To get this, open Telegram and search for <strong>@userinfobot</strong>, start the bot, and copy the ID it replies with. For group or channel IDs you may need to add an ID bot there first.
+                                        From @userinfobot in Telegram.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -169,7 +169,7 @@ export const TelegramDialog = ({
                                         />
                                     </FormControl>
                                     <FormDescription>
-                                        Sets the behavior of the assistant. Use {"{{variables}}"} for dynamic values or {"{{json variable}}"} to stringify objects.
+                                        The message to send. Supports {"{{variables}}"}.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
