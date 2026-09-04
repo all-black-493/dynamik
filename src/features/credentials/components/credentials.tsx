@@ -124,9 +124,11 @@ const credentialLogos: Record<CredentialType, string> = {
     [CredentialType.WHATSAPP_ACCESS_TOKEN]: "/logos/whatsapp.svg"
 
 }
+// The encrypted secret is projected out of every credential read, so the list
+// item works from the metadata alone.
 export const CredentialItem = ({
     data
-}: { data: Credential }) => {
+}: { data: Omit<Credential, "value"> }) => {
 
     const removeCredential = useRemoveCredential()
     const handleRemove = () => {

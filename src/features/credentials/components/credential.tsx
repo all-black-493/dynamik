@@ -15,13 +15,17 @@ import { useForm } from "react-hook-form"
 import z from "zod"
 import { useCreateCredential, useSuspenseCredential, useUpdateCredential } from "../hooks/use-credentials"
 
-const formSchema = z.object({
+// The stored key is never sent to the browser, so an edit leaves the field
+// blank and only submits a value when the user is actually rotating the key.
+const buildFormSchema = (isEdit: boolean) => z.object({
     name: z.string().min(1, "Name is required"),
     type: z.enum(CredentialType),
-    value: z.string().min(1, "API key is required")
+    value: isEdit
+        ? z.string().optional()
+        : z.string().min(1, "API key is required")
 })
 
-type FormValues = z.infer<typeof formSchema>
+type FormValues = z.infer<ReturnType<typeof buildFormSchema>>
 
 const credentialTypeOptions = [
     {
@@ -76,7 +80,6 @@ interface CredentialFormProps {
         id?: string
         name: string
         type: CredentialType
-        value: string
     }
 }
 
@@ -90,10 +93,10 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
     const isEdit = !!initialData?.id
 
     const form = useForm<FormValues>({
-        resolver: zodResolver(formSchema),
-        defaultValues: initialData || {
-            name: "",
-            type: CredentialType.OPENAI,
+        resolver: zodResolver(buildFormSchema(isEdit)),
+        defaultValues: {
+            name: initialData?.name ?? "",
+            type: initialData?.type ?? CredentialType.OPENAI,
             value: ""
         }
     })
@@ -105,7 +108,9 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
                 ...values
             })
         } else {
-            await createCredential.mutateAsync(values, {
+            // The create schema guarantees a value; the optional type comes from
+            // the shared edit schema.
+            await createCredential.mutateAsync({ ...values, value: values.value ?? "" }, {
                 onSuccess: (data) => {
                     router.push(`/credentials/${data.id}`)
                 },
@@ -197,12 +202,15 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>
-                                            API Key
+                                            {isEdit ? "API Key (leave blank to keep current)" : "API Key"}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="password"
-                                                placeholder="sk-..." {...field}
+                                                autoComplete="off"
+                                                placeholder={isEdit ? "Unchanged" : "sk-..."}
+                                                {...field}
+                                                value={field.value ?? ""}
                                             />
                                         </FormControl>
                                         <FormMessage />
