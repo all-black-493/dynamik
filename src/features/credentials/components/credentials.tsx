@@ -120,7 +120,8 @@ const credentialLogos: Record<CredentialType, string> = {
     [CredentialType.PERPLEXITY]: "/logos/perplexity.svg",
     [CredentialType.GROK]: "/logos/grok.svg",
     [CredentialType.TIKTOK_CLIENT_KEY]: "/logos/tiktok.svg",
-    [CredentialType.TIKTOK_CLIENT_SECRET]: "/logos/tiktok.svg"
+    [CredentialType.TIKTOK_CLIENT_SECRET]: "/logos/tiktok.svg",
+    [CredentialType.WHATSAPP_ACCESS_TOKEN]: "/logos/whatsapp.svg"
 
 }
 export const CredentialItem = ({

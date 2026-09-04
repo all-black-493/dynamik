@@ -10,10 +10,11 @@ import { WhatsappDialog, WhatsappFormValues } from "./dialog"
 
 type whatsappNodeData = {
     variableName?: string;
-    model?: string ;
-    systemPrompt?: string;
-    userPrompt?: string;
-
+    credentialId?: string;
+    phoneNumberId?: string;
+    recipient?: string;
+    content?: string;
+    previewUrl?: boolean;
 }
 
 type WhatsappNodeType = Node<whatsappNodeData>
@@ -49,8 +50,8 @@ export const WhatsappNode = memo((props: NodeProps<WhatsappNodeType>) => {
     }
 
     const nodeData = props.data
-    const description = nodeData?.userPrompt
-        ? `${nodeData.model}: ${nodeData.userPrompt.slice(0, 50)} ...`
+    const description = nodeData?.recipient
+        ? `To ${nodeData.recipient}: ${(nodeData.content ?? "").slice(0, 40)} ...`
         : "Not configured"
 
 

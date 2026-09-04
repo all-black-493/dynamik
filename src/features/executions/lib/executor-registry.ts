@@ -15,6 +15,7 @@ import { discordExecutor } from "../components/discord/executor";
 import { slackExecutor } from "../components/slack/executor";
 import { telegramExecutor } from "../components/telegram/executor";
 import { tiktokExecutor } from "../components/tiktok/executor";
+import { whatsappExecutor } from "../components/whatsapp/executor";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.INITIAL]: manualTriggerExecutor,
@@ -33,7 +34,7 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.SLACK]: slackExecutor,
     [NodeType.TELEGRAM]:telegramExecutor,
     [NodeType.TIKTOK]: tiktokExecutor,
-    [NodeType.WHATSAPP]: discordExecutor
+    [NodeType.WHATSAPP]: whatsappExecutor
 }
 
 export const getExecutor = (type: NodeType): NodeExecutor => {

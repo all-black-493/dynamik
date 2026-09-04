@@ -64,6 +64,11 @@ const credentialTypeOptions = [
         label: "Tiktok Client Secret",
         logo: "/logos/tiktok.svg"
     },
+    {
+        value: CredentialType.WHATSAPP_ACCESS_TOKEN,
+        label: "Whatsapp Access Token",
+        logo: "/logos/whatsapp.svg"
+    },
 ]
 
 interface CredentialFormProps {

@@ -1,12 +1,11 @@
 import type { NodeExecutor } from "@/features/executions/lib/types";
-import { NonRetriableError } from "inngest";
-import Handlebars from "handlebars"
-import { geminiChannel } from "@/inngest/channels/gemini";
-import { createGoogleGenerativeAI } from "@ai-sdk/google"
-import { generateText } from "ai"
-import { createMCPClient } from '@ai-sdk/mcp';
+import { whatsappChannel } from "@/inngest/channels/whatsapp";
 import prisma from "@/lib/db";
-
+import { decrypt } from "@/lib/encryption";
+import Handlebars from "handlebars";
+import { decode } from "html-entities";
+import { NonRetriableError } from "inngest";
+import ky from "ky";
 
 Handlebars.registerHelper("json", (context) => {
     const stringified = JSON.stringify(context, null, 2)
@@ -14,19 +13,24 @@ Handlebars.registerHelper("json", (context) => {
     return safeString
 })
 
-type geminiData = {
-    variableName?: string;
-    model?: string;
-    systemPrompt?: string;
-    userPrompt?: string;
-    mcpServerUrl?: string;
-    mcpAuthToken?: string;
-    enabledTools?: string[];
-    credentialId?: string
+const GRAPH_API_VERSION = "v21.0"
+const MAX_BODY_LENGTH = 4096
 
+type whatsappData = {
+    variableName?: string;
+    phoneNumberId?: string;
+    recipient?: string;
+    content?: string;
+    previewUrl?: boolean;
+    credentialId?: string
 }
 
-export const geminiExecutor: NodeExecutor<geminiData> = async ({
+type whatsappResponse = {
+    messages?: { id: string }[];
+    contacts?: { wa_id: string }[]
+}
+
+export const whatsappExecutor: NodeExecutor<whatsappData> = async ({
     data,
     nodeId,
     context,
@@ -35,48 +39,56 @@ export const geminiExecutor: NodeExecutor<geminiData> = async ({
     publish
 }) => {
 
+    const fail = async (message: string) => {
+        await publish(
+            whatsappChannel().status({
+                nodeId,
+                status: "error"
+            })
+        )
+        return new NonRetriableError(`Whatsapp node: ${message}`)
+    }
+
     await publish(
-        geminiChannel().status({
+        whatsappChannel().status({
             nodeId,
             status: "loading"
         })
     )
 
     if (!data.variableName) {
-        await publish(
-            geminiChannel().status({
-                nodeId,
-                status: "error"
-            })
-        )
-        throw new NonRetriableError("Gemini node: Variable name is missing")
+        throw await fail("Variable name is missing")
     }
 
     if (!data.credentialId) {
-        await publish(
-            geminiChannel().status({
-                nodeId,
-                status: "error"
-            })
-        )
-        throw new NonRetriableError("Gemini node: Credential is required")
+        throw await fail("Credential is required")
     }
 
-    if (!data.userPrompt) {
-        await publish(
-            geminiChannel().status({
-                nodeId,
-                status: "error"
-            })
-        )
+    if (!data.phoneNumberId) {
+        throw await fail("Phone number ID is missing")
     }
 
-    const systemPrompt = data.systemPrompt
-        ? Handlebars.compile(data.systemPrompt)(context)
-        : "You are a helpful assistant"
+    if (!data.recipient) {
+        throw await fail("Recipient phone number is missing")
+    }
 
-    const userPrompt = Handlebars.compile(data.userPrompt)(context)
- 
+    if (!data.content) {
+        throw await fail("Message content is missing")
+    }
+
+    const recipient = decode(Handlebars.compile(data.recipient)(context)).trim()
+    const content = decode(Handlebars.compile(data.content)(context))
+
+    if (!recipient) {
+        throw await fail("Recipient phone number resolved to an empty value")
+    }
+
+    if (!content.trim()) {
+        throw await fail("Message content resolved to an empty value")
+    }
+
+    const body = content.slice(0, MAX_BODY_LENGTH)
+
     const credential = await step.run("get-credential", () => {
         return prisma.credential.findUnique({
             where: {
@@ -87,82 +99,55 @@ export const geminiExecutor: NodeExecutor<geminiData> = async ({
     })
 
     if (!credential) {
-        throw new NonRetriableError("Gemini node: Credential not found")
-    }
-    const google = createGoogleGenerativeAI({
-        apiKey: credential.value
-    })
-
-    let mcpClient;
-    let finalTools = {}
-
-    if (data.mcpServerUrl) {
-        mcpClient = await createMCPClient({
-            transport: {
-                type: 'http',
-                url: data.mcpServerUrl,
-                headers: data.mcpAuthToken ? { Authorization: `Bearer ${data.mcpAuthToken}` } : {}
-            }
-        });
-
-        const allAvailableTools = await mcpClient.tools();
-
-        if (data.enabledTools && data.enabledTools.length > 0) {
-            finalTools = Object.fromEntries(
-                Object.entries(allAvailableTools).filter(([name]) =>
-                    data.enabledTools!.includes(name)
-                )
-            );
-        } else {
-            // If no list is provided, perhaps default to no tools for safety
-            finalTools = {};
-        }
-
-        console.log("[MCP TOOLS: ]", finalTools)
+        throw await fail("Credential not found")
     }
 
-
+    const accessToken = decrypt(credential.value)
 
     try {
-        const { steps } = await step.ai.wrap(
-            "gemini-generate-text",
-            generateText,
-            {
-                model: google(data.model! || "gemini-2.5-pro"),
-                system: systemPrompt,
-                prompt: userPrompt,
-                experimental_telemetry: {
-                    isEnabled: true,
-                    recordInputs: true,
-                    recordOutputs: true,
-                },
-                // tools: finalTools,
-                maxRetries: 2
+        const result = await step.run("whatsapp-send-message", async () => {
+            const response = await ky.post(
+                `https://graph.facebook.com/${GRAPH_API_VERSION}/${data.phoneNumberId}/messages`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    },
+                    json: {
+                        messaging_product: "whatsapp",
+                        recipient_type: "individual",
+                        to: recipient,
+                        type: "text",
+                        text: {
+                            preview_url: data.previewUrl ?? false,
+                            body
+                        }
+                    }
+                }
+            ).json<whatsappResponse>()
+
+            return {
+                ...context,
+                [data.variableName!]: {
+                    whatsappMessageSent: true,
+                    messageId: response.messages?.[0]?.id,
+                    recipient: response.contacts?.[0]?.wa_id ?? recipient,
+                    messageContent: body
+                }
             }
-        )
-
-        const text = steps[0].content[0].type === "text"
-            ? steps[0].content[0].text
-            : "";
-
-        if (mcpClient) await mcpClient.close();
+        })
 
         await publish(
-            geminiChannel().status({
+            whatsappChannel().status({
                 nodeId,
                 status: "success"
             })
         )
 
-        return {
-            ...context,
-            [data.variableName]: {
-                text
-            }
-        }
+        return result
+
     } catch (error) {
         await publish(
-            geminiChannel().status({
+            whatsappChannel().status({
                 nodeId,
                 status: "error"
             })
