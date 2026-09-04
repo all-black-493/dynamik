@@ -24,6 +24,7 @@ import { switchExecutor } from "../components/switch/executor";
 import { mergeExecutor } from "../components/merge/executor";
 import { filterExecutor } from "../components/filter/executor";
 import { waitExecutor } from "../components/wait/executor";
+import { postgresExecutor } from "../components/postgres/executor";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.INITIAL]: manualTriggerExecutor,
@@ -50,7 +51,8 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.SWITCH]: switchExecutor,
     [NodeType.MERGE]: mergeExecutor,
     [NodeType.FILTER]: filterExecutor,
-    [NodeType.WAIT]: waitExecutor
+    [NodeType.WAIT]: waitExecutor,
+    [NodeType.POSTGRES]: postgresExecutor
 }
 
 export const getExecutor = (type: NodeType): NodeExecutor => {

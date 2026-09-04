@@ -170,6 +170,19 @@ export const nodeCategories: NodeCategory[] = [
         ]
     },
     {
+        id: "data",
+        label: "Data",
+        hint: "Query and store",
+        nodes: [
+            {
+                type: NodeType.POSTGRES,
+                label: "Postgres",
+                description: "Query a database, or Redshift",
+                icon: "/logos/postgresql.svg"
+            }
+        ]
+    },
+    {
         id: "actions",
         label: "Actions",
         hint: "Send and update",
