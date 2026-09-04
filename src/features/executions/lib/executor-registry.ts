@@ -26,6 +26,7 @@ import { filterExecutor } from "../components/filter/executor";
 import { waitExecutor } from "../components/wait/executor";
 import { postgresExecutor } from "../components/postgres/executor";
 import { displayExecutor } from "../components/display/executor";
+import { odooExecutor } from "../components/odoo/executor";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.INITIAL]: manualTriggerExecutor,
@@ -54,7 +55,8 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.FILTER]: filterExecutor,
     [NodeType.WAIT]: waitExecutor,
     [NodeType.POSTGRES]: postgresExecutor,
-    [NodeType.DISPLAY]: displayExecutor
+    [NodeType.DISPLAY]: displayExecutor,
+    [NodeType.ODOO]: odooExecutor
 }
 
 export const getExecutor = (type: NodeType): NodeExecutor => {

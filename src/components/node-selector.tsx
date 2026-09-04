@@ -235,6 +235,12 @@ export const nodeCategories: NodeCategory[] = [
                 label: "HubSpot",
                 description: "Read or write records",
                 icon: "/logos/hubspot.svg"
+            },
+            {
+                type: NodeType.ODOO,
+                label: "Odoo",
+                description: "Read or write any model",
+                icon: "/logos/odoo.svg"
             }
         ]
     }

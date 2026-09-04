@@ -95,6 +95,11 @@ const credentialTypeOptions = [
         label: "Postgres",
         logo: "/logos/postgresql.svg"
     },
+    {
+        value: CredentialType.ODOO,
+        label: "Odoo",
+        logo: "/logos/odoo.svg"
+    },
 ]
 
 interface CredentialFormProps {
