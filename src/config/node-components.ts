@@ -13,6 +13,7 @@ import { TiktokNode } from "@/features/executions/components/tiktok/node";
 import { WhatsappNode } from "@/features/executions/components/whatsapp/node";
 import { SalesforceNode } from "@/features/executions/components/salesforce/node";
 import { HubspotNode } from "@/features/executions/components/hubspot/node";
+import { IfNode } from "@/features/executions/components/if/node";
 import GoogleFormTrigger from "@/features/triggers/components/google-form-trigger/node";
 import ManualTriggerNode from "@/features/triggers/components/manual-trigger/node";
 import MPESATrigger from "@/features/triggers/components/MPESA-trigger/node";
@@ -39,7 +40,8 @@ export const nodeComponents = {
     [NodeType.TIKTOK]:TiktokNode,
     [NodeType.WHATSAPP]: WhatsappNode,
     [NodeType.SALESFORCE]: SalesforceNode,
-    [NodeType.HUBSPOT]: HubspotNode
+    [NodeType.HUBSPOT]: HubspotNode,
+    [NodeType.IF]: IfNode
 
 } as const satisfies NodeTypes
 

@@ -1,12 +1,19 @@
-import { Connection, Node } from "@/generated/prisma"
 import toposort from "toposort"
 import { inngest } from "./client"
 import { createId } from "@paralleldrive/cuid2"
 
-export const topologicalSort = (
-    nodes: Node[],
-    connections: Connection[]
-): Node[] => {
+/**
+ * Only the identity of a node and the shape of an edge matter here, so these
+ * are structural. That lets the sort run on rows that have been through
+ * step.run, which turns Date fields into strings.
+ */
+export type SortableNode = { id: string }
+export type SortableConnection = { fromNodeId: string; toNodeId: string }
+
+export const topologicalSort = <TNode extends SortableNode>(
+    nodes: TNode[],
+    connections: SortableConnection[]
+): TNode[] => {
 
     if (connections.length === 0) {
         return nodes
@@ -45,7 +52,9 @@ export const topologicalSort = (
     }
 
     const nodeMap = new Map(nodes.map((n) => [n.id, n]))
-    return sortedNodeIds.map((id) => nodeMap.get(id)!).filter(Boolean)
+    return sortedNodeIds
+        .map((id) => nodeMap.get(id))
+        .filter((node): node is TNode => Boolean(node))
 }
 
 export const sendWorkflowExecution = async (data: {

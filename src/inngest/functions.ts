@@ -1,9 +1,10 @@
 import { NonRetriableError } from "inngest";
 import { inngest } from "./client";
 import prisma from "@/lib/db";
-import { topologicalSort } from "./utils";
 import { ExecutionStatus, NodeType } from "@/generated/prisma";
 import { getExecutor } from "@/features/executions/lib/executor-registry";
+import { toOutcome } from "@/features/executions/lib/types";
+import { createExecutionPlan } from "@/features/executions/lib/execution-plan";
 import { httpRequestChannel } from "./channels/http-request";
 import { manualTriggerChannel } from "./channels/manual-trigger";
 import { googleFormTriggerChannel } from "./channels/google-form-trigger";
@@ -22,13 +23,14 @@ import { discordChannel } from "./channels/discord";
 import { whatsappChannel } from "./channels/whatsapp";
 import { salesforceChannel } from "./channels/salesforce";
 import { hubspotChannel } from "./channels/hubspot";
+import { ifChannel } from "./channels/if";
 
 
 export const executeWorkflow = inngest.createFunction(
     {
         id: "execute-workflow",
         retries: process.env.NODE_ENV === "production" ? 3 : 0,
-        onFailure: async ({ event, step }) => {
+        onFailure: async ({ event }) => {
             return prisma.execution.update({
                 where: { inngestEventId: event.data.event.id },
                 data: {
@@ -60,6 +62,7 @@ export const executeWorkflow = inngest.createFunction(
             whatsappChannel(),
             salesforceChannel(),
             hubspotChannel(),
+            ifChannel(),
         ]
     },
 
@@ -82,7 +85,7 @@ export const executeWorkflow = inngest.createFunction(
             })
         })
 
-        const sorted_nodes = await step.run(
+        const graph = await step.run(
             "prepare-workflow",
             async () => {
                 const workflow = await prisma.workflow.findUniqueOrThrow({
@@ -93,8 +96,13 @@ export const executeWorkflow = inngest.createFunction(
                     }
                 })
 
-                return topologicalSort(workflow.nodes, workflow.connections)
+                return {
+                    nodes: workflow.nodes,
+                    connections: workflow.connections
+                }
             })
+
+        const plan = createExecutionPlan(graph.nodes, graph.connections)
 
         const userId = await step.run("find-user-id", async () => {
             const workflow = await prisma.workflow.findUniqueOrThrow({
@@ -109,9 +117,15 @@ export const executeWorkflow = inngest.createFunction(
 
         let context = event.data.initialData || {}
 
-        for (const node of sorted_nodes) {
+        for (const node of plan.sorted) {
+            if (!plan.isActive(node.id)) {
+                plan.skip(node.id)
+                continue
+            }
+
             const executor = getExecutor(node.type as NodeType)
-            context = await executor({
+
+            const result = await executor({
                 data: node.data as Record<string, unknown>,
                 nodeId: node.id,
                 userId,
@@ -119,6 +133,11 @@ export const executeWorkflow = inngest.createFunction(
                 step,
                 publish
             })
+
+            const outcome = toOutcome(result)
+            context = outcome.context
+
+            plan.advance(node.id, outcome.outputs)
         }
 
         await step.run("update-execution", async () => {
