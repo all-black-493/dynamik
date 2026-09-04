@@ -80,8 +80,7 @@ export const WaitDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }:
                 <DialogHeader>
                     <DialogTitle>Wait Configuration</DialogTitle>
                     <DialogDescription>
-                        Pause the run. Nothing is held open while it waits, so a workflow can
-                        pause for days without anything running.
+                        Pauses without holding anything open, so days are fine.
                     </DialogDescription>
                 </DialogHeader>
 

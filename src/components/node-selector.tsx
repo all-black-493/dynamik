@@ -12,6 +12,7 @@ import {
     RepeatIcon,
     SplitIcon
 } from "lucide-react"
+import Image from "next/image"
 import { useCallback } from "react"
 import { toast } from "sonner"
 import {
@@ -23,7 +24,6 @@ import {
     SheetTrigger
 } from "@/components/ui/sheet"
 import { NodeType } from "@/generated/prisma"
-import { Separator } from "./ui/separator"
 
 export type NodeTypeOption = {
     type: NodeType
@@ -32,157 +32,191 @@ export type NodeTypeOption = {
     icon: React.ComponentType<{ className?: string }> | string
 }
 
-const triggerNodes: NodeTypeOption[] = [
-    {
-        type: NodeType.GOOGLE_FORM_TRIGGER,
-        label: "Google Form",
-        description: "Runs the flow when a Google Form is submitted",
-        icon: "/logos/googleform.svg",
-    },
+export type NodeCategory = {
+    id: string
+    label: string
+    hint: string
+    nodes: NodeTypeOption[]
+}
 
+/**
+ * The picker, grouped by what a node is for rather than by one long list.
+ *
+ * Triggers start a run, core nodes shape it, AI nodes think, and actions reach
+ * outside. Ordered so the list reads in the order a workflow is built.
+ */
+export const nodeCategories: NodeCategory[] = [
     {
-        type: NodeType.MANUAL_TRIGGER,
-        label: "Trigger manually",
-        description: "Runs the flow on clicking a button. Good for getting started quickly",
-        icon: MousePointerIcon,
-    },
-
-    {
-        type: NodeType.STRIPE_TRIGGER,
-        label: "Stripe Event",
-        description: "Runs the flow when a Stripe Event is captured",
-        icon: "/logos/stripe.svg",
-    },
-
-    {
-        type: NodeType.MPESA_TRIGGER,
-        label: "MPESA Event",
-        description: "Runs the flow when an MPESA Event occurs",
-        icon: "/logos/mpesa.png",
-    },
-
-]
-
-const executionNodes: NodeTypeOption[] = [
-    {
-        type: NodeType.HTTP_REQUEST,
-        label: "HTTP Request",
-        description: "Makes an HTTP request",
-        icon: GlobeIcon
-    },
-    {
-        type: NodeType.GEMINI,
-        label: "Gemini",
-        description: "Uses Google Gemini to generate text",
-        icon: "/logos/gemini.svg"
-    },
-    {
-        type: NodeType.OPENAI,
-        label: "Open AI",
-        description: "Uses Open AI to generate text",
-        icon: "/logos/openai.svg"
+        id: "triggers",
+        label: "Triggers",
+        hint: "Start a workflow",
+        nodes: [
+            {
+                type: NodeType.MANUAL_TRIGGER,
+                label: "Trigger manually",
+                description: "Run it yourself, from the editor",
+                icon: MousePointerIcon
+            },
+            {
+                type: NodeType.GOOGLE_FORM_TRIGGER,
+                label: "Google Form",
+                description: "A form is submitted",
+                icon: "/logos/googleform.svg"
+            },
+            {
+                type: NodeType.STRIPE_TRIGGER,
+                label: "Stripe",
+                description: "A Stripe event arrives",
+                icon: "/logos/stripe.svg"
+            },
+            {
+                type: NodeType.MPESA_TRIGGER,
+                label: "M-Pesa",
+                description: "An M-Pesa payment arrives",
+                icon: "/logos/mpesa.png"
+            }
+        ]
     },
     {
-        type: NodeType.DEEPSEEK,
-        label: "DeepSeek",
-        description: "Uses Deepseek to generate text",
-        icon: "/logos/deepseek.svg"
+        id: "core",
+        label: "Core",
+        hint: "Decide, repeat and pause",
+        nodes: [
+            {
+                type: NodeType.IF,
+                label: "If",
+                description: "Two paths, one condition",
+                icon: GitBranchIcon
+            },
+            {
+                type: NodeType.SWITCH,
+                label: "Switch",
+                description: "One path per rule",
+                icon: SplitIcon
+            },
+            {
+                type: NodeType.FILTER,
+                label: "Filter",
+                description: "Stop unless conditions hold",
+                icon: FilterIcon
+            },
+            {
+                type: NodeType.MERGE,
+                label: "Merge",
+                description: "Bring branches back together",
+                icon: GitMergeIcon
+            },
+            {
+                type: NodeType.LOOP,
+                label: "Loop",
+                description: "Repeat for each item",
+                icon: RepeatIcon
+            },
+            {
+                type: NodeType.WAIT,
+                label: "Wait",
+                description: "Pause, then carry on",
+                icon: ClockIcon
+            },
+            {
+                type: NodeType.HTTP_REQUEST,
+                label: "HTTP Request",
+                description: "Call any API",
+                icon: GlobeIcon
+            }
+        ]
     },
     {
-        type: NodeType.GROK,
-        label: "Grok",
-        description: "Uses Grok to generate text",
-        icon: "/logos/grok.svg"
+        id: "ai",
+        label: "AI",
+        hint: "Generate and reason",
+        nodes: [
+            {
+                type: NodeType.OPENAI,
+                label: "OpenAI",
+                description: "Generate text",
+                icon: "/logos/openai.svg"
+            },
+            {
+                type: NodeType.ANTHROPIC,
+                label: "Anthropic",
+                description: "Generate text",
+                icon: "/logos/anthropic.svg"
+            },
+            {
+                type: NodeType.GEMINI,
+                label: "Gemini",
+                description: "Generate text",
+                icon: "/logos/gemini.svg"
+            },
+            {
+                type: NodeType.GROK,
+                label: "Grok",
+                description: "Generate text",
+                icon: "/logos/grok.svg"
+            },
+            {
+                type: NodeType.DEEPSEEK,
+                label: "DeepSeek",
+                description: "Generate text",
+                icon: "/logos/deepseek.svg"
+            },
+            {
+                type: NodeType.PERPLEXITY,
+                label: "Perplexity",
+                description: "Generate text, with search",
+                icon: "/logos/perplexity.svg"
+            }
+        ]
     },
     {
-        type: NodeType.PERPLEXITY,
-        label: "Perplexity",
-        description: "Uses Perplexity AI to generate text",
-        icon: "/logos/perplexity.svg"
-    },
-    {
-        type: NodeType.ANTHROPIC,
-        label: "Anthropic",
-        description: "Uses Claude AI to generate text",
-        icon: "/logos/anthropic.svg"
-    },
-    {
-        type: NodeType.DISCORD,
-        label: "Discord",
-        description: "Send a Message to Discord",
-        icon: "/logos/discord.svg"
-    },
-    {
-        type: NodeType.TELEGRAM,
-        label: "Telegram",
-        description: "Send a Message to Telegram",
-        icon: "/logos/telegram.svg"
-    },
-    {
-        type: NodeType.TIKTOK,
-        label: "Tiktok",
-        description: "Post a Video to Tiktok",
-        icon: "/logos/tiktok.svg"
-    },
-    {
-        type: NodeType.SLACK,
-        label: "Slack",
-        description: "Send a Message to Slack",
-        icon: "/logos/slack.svg"
-    },
-    {
-        type: NodeType.WHATSAPP,
-        label: "Whatsapp",
-        description: "Send a Message to Whatsapp",
-        icon: "/logos/whatsapp.svg"
-    },
-    {
-        type: NodeType.SALESFORCE,
-        label: "Salesforce",
-        description: "Query or Update any Salesforce Record",
-        icon: "/logos/salesforce.svg"
-    },
-    {
-        type: NodeType.HUBSPOT,
-        label: "Hubspot",
-        description: "Search or Update any Hubspot Record",
-        icon: "/logos/hubspot.svg"
-    },
-    {
-        type: NodeType.IF,
-        label: "If",
-        description: "Branch on a Condition",
-        icon: GitBranchIcon
-    },
-    {
-        type: NodeType.LOOP,
-        label: "Loop",
-        description: "Repeat Nodes for each Item in a List",
-        icon: RepeatIcon
-    },
-    {
-        type: NodeType.SWITCH,
-        label: "Switch",
-        description: "Route down One of Several Paths",
-        icon: SplitIcon
-    },
-    {
-        type: NodeType.MERGE,
-        label: "Merge",
-        description: "Rejoin Branches",
-        icon: GitMergeIcon
-    },
-    {
-        type: NodeType.FILTER,
-        label: "Filter",
-        description: "Continue only if Conditions Hold",
-        icon: FilterIcon
-    },
-    {
-        type: NodeType.WAIT,
-        label: "Wait",
-        description: "Pause the Run",
-        icon: ClockIcon
+        id: "actions",
+        label: "Actions",
+        hint: "Send and update",
+        nodes: [
+            {
+                type: NodeType.SLACK,
+                label: "Slack",
+                description: "Send a message",
+                icon: "/logos/slack.svg"
+            },
+            {
+                type: NodeType.DISCORD,
+                label: "Discord",
+                description: "Send a message",
+                icon: "/logos/discord.svg"
+            },
+            {
+                type: NodeType.TELEGRAM,
+                label: "Telegram",
+                description: "Send a message",
+                icon: "/logos/telegram.svg"
+            },
+            {
+                type: NodeType.WHATSAPP,
+                label: "WhatsApp",
+                description: "Send a message",
+                icon: "/logos/whatsapp.svg"
+            },
+            {
+                type: NodeType.TIKTOK,
+                label: "TikTok",
+                description: "Post a video",
+                icon: "/logos/tiktok.svg"
+            },
+            {
+                type: NodeType.SALESFORCE,
+                label: "Salesforce",
+                description: "Read or write records",
+                icon: "/logos/salesforce.svg"
+            },
+            {
+                type: NodeType.HUBSPOT,
+                label: "HubSpot",
+                description: "Read or write records",
+                icon: "/logos/hubspot.svg"
+            }
+        ]
     }
 ]
 
@@ -255,78 +289,58 @@ export function NodeSelector({
             </SheetTrigger>
             <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
                 <SheetHeader>
-                    <SheetTitle>
-                        What triggers this workflow ?
-                    </SheetTitle>
+                    <SheetTitle>Add a node</SheetTitle>
                     <SheetDescription>
-                        A trigger is a step that starts your workflow .
+                        Start with a trigger, then build outwards.
                     </SheetDescription>
                 </SheetHeader>
 
-                <div>
-                    {triggerNodes.map((nodeType) => {
-                        const Icon = nodeType.icon
-                        return (
-                            <div
-                                key={nodeType.type}
-                                className="w-full justify-start h-auto py-5 px-4 rounded-none cursor-pointer border-l-2 border-transparent hover:border-l-primary"
-                                onClick={() => handleNodeSelect(nodeType)}
-                            >
-                                <div className="flex items-center gap-6 w-full overflow-hidden">
-                                    {typeof Icon === "string" ? (
-                                        <img
-                                            src={Icon}
-                                            alt={nodeType.label}
-                                            className="size-7 object-contain rounded-sm"
-                                        />
-                                    ) : (
-                                        <Icon className="size-5" />
-                                    )}
-                                    <div className="flex flex-col items-start text-left">
-                                        <span className="font-medium text-sm">
-                                            {nodeType.label}
-                                        </span>
-                                        <span className="text-xs text-muted-foreground">
-                                            {nodeType.description}
-                                        </span>
-                                    </div>
-                                </div>
+                <div className="pb-8">
+                    {nodeCategories.map((category) => (
+                        <section key={category.id}>
+                            <div className="sticky top-0 z-10 flex items-baseline gap-2 bg-background px-4 py-2">
+                                <h3 className="font-medium text-sm">{category.label}</h3>
+                                <span className="text-muted-foreground text-xs">
+                                    {category.hint}
+                                </span>
                             </div>
-                        )
-                    })}
-                </div>
-                <Separator />
-                <div>
-                    {executionNodes.map((nodeType) => {
-                        const Icon = nodeType.icon
-                        return (
-                            <div
-                                key={nodeType.type}
-                                className="w-full justify-start h-auto py-5 px-4 rounded-none cursor-pointer border-l-2 border-transparent hover:border-l-primary"
-                                onClick={() => handleNodeSelect(nodeType)}
-                            >
-                                <div className="flex items-center gap-6 w-full overflow-hidden">
-                                    {typeof Icon === "string" ? (
-                                        <img
-                                            src={Icon}
-                                            alt={nodeType.label}
-                                            className="size-5 object-contain rounded-sm"
-                                        />
-                                    ) : (
-                                        <Icon className="size-5" />
-                                    )}
-                                    <div className="flex flex-col items-start text-left">
-                                        <span className="font-medium text-sm">
-                                            {nodeType.label}
-                                        </span>
-                                        <span className="text-xs text-muted-foreground">
-                                            {nodeType.description}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        )
-                    })}
+
+                            {category.nodes.map((nodeType) => {
+                                const Icon = nodeType.icon
+
+                                return (
+                                    <button
+                                        type="button"
+                                        key={nodeType.type}
+                                        className="w-full cursor-pointer border-transparent border-l-2 px-4 py-3 text-left hover:border-l-primary hover:bg-accent/40"
+                                        onClick={() => handleNodeSelect(nodeType)}
+                                    >
+                                        <div className="flex w-full items-center gap-4 overflow-hidden">
+                                            {typeof Icon === "string" ? (
+                                                <Image
+                                                    src={Icon}
+                                                    alt=""
+                                                    width={24}
+                                                    height={24}
+                                                    className="size-6 rounded-sm object-contain"
+                                                />
+                                            ) : (
+                                                <Icon className="size-5 text-muted-foreground" />
+                                            )}
+                                            <div className="flex flex-col items-start">
+                                                <span className="font-medium text-sm">
+                                                    {nodeType.label}
+                                                </span>
+                                                <span className="text-muted-foreground text-xs">
+                                                    {nodeType.description}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </button>
+                                )
+                            })}
+                        </section>
+                    ))}
                 </div>
             </SheetContent>
         </Sheet>

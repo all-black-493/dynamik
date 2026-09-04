@@ -408,8 +408,7 @@ export const SalesforceDialog = ({
                                                 />
                                             </FormControl>
                                             <FormDescription>
-                                                Relative to the API version, or start with / to address the
-                                                instance directly, such as /services/apexrest/MyEndpoint
+                                                Relative to the API version, or / for the instance root
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>

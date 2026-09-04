@@ -151,7 +151,7 @@ export const SlackDialog = ({
                                         />
                                     </FormControl>
                                     <FormDescription>
-                                        Sets the behavior of the assistant. Use {"{{variables}}"} for dynamic values or {"{{json variable}}"} to stringify objects.
+                                        The message to send. Supports {"{{variables}}"}.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
