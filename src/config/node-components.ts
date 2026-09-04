@@ -19,6 +19,7 @@ import { SwitchNode } from "@/features/executions/components/switch/node";
 import { MergeNode } from "@/features/executions/components/merge/node";
 import { FilterNode } from "@/features/executions/components/filter/node";
 import { WaitNode } from "@/features/executions/components/wait/node";
+import { PostgresNode } from "@/features/executions/components/postgres/node";
 import GoogleFormTrigger from "@/features/triggers/components/google-form-trigger/node";
 import ManualTriggerNode from "@/features/triggers/components/manual-trigger/node";
 import MPESATrigger from "@/features/triggers/components/MPESA-trigger/node";
@@ -51,7 +52,8 @@ export const nodeComponents = {
     [NodeType.SWITCH]: SwitchNode,
     [NodeType.MERGE]: MergeNode,
     [NodeType.FILTER]: FilterNode,
-    [NodeType.WAIT]: WaitNode
+    [NodeType.WAIT]: WaitNode,
+    [NodeType.POSTGRES]: PostgresNode
 
 } as const satisfies NodeTypes
 

@@ -90,6 +90,11 @@ const credentialTypeOptions = [
         label: "Hubspot",
         logo: "/logos/hubspot.svg"
     },
+    {
+        value: CredentialType.POSTGRES,
+        label: "Postgres",
+        logo: "/logos/logo.svg"
+    },
 ]
 
 interface CredentialFormProps {

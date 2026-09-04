@@ -102,6 +102,7 @@ enum CredentialType {
   WHATSAPP_ACCESS_TOKEN
   SALESFORCE
   HUBSPOT
+  POSTGRES
 }
 
 model Workflow {
@@ -144,6 +145,7 @@ enum NodeType {
   MERGE
   FILTER
   WAIT
+  POSTGRES
 }
 
 model Node {

@@ -40,6 +40,24 @@ export const credentialFields: Partial<Record<CredentialType, CredentialField[]>
             description: "Enable the client credentials flow on the connected app and assign it a run-as user",
             secret: true
         }
+    ],
+    [CredentialType.POSTGRES]: [
+        {
+            key: "host",
+            label: "Host",
+            placeholder: "db.example.com",
+            description: "Also works for Redshift, which speaks the same protocol"
+        },
+        { key: "port", label: "Port", placeholder: "5432" },
+        { key: "database", label: "Database", placeholder: "postgres" },
+        { key: "user", label: "User", placeholder: "postgres" },
+        { key: "password", label: "Password", secret: true },
+        {
+            key: "ssl",
+            label: "SSL",
+            placeholder: "require",
+            description: "require, or disable for a local database"
+        }
     ]
 }
 
