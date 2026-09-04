@@ -99,10 +99,13 @@ export const GeminiDialog = ({
     }, [open, defaultValues, form])
 
     const watchVariableName = form.watch("variableName") || "myGemini"
+    const selectedCredentialId = form.watch("credentialId");
     const currentMcpUrl = form.watch("mcpServerUrl")
     const currentMcpAuth = form.watch("mcpAuthToken")
     const { data, isLoading: isFetchingModels, error } = useSWR(
-        open ? "/api/models/gemini" : null,
+        open && selectedCredentialId
+            ? `/api/models/gemini?credentialId=${selectedCredentialId}`
+            : null,
         fetcher
     );
 

@@ -99,10 +99,13 @@ export const OpenAIDialog = ({
     }, [open, defaultValues, form])
 
     const watchVariableName = form.watch("variableName") || "myOpenAI"
+    const selectedCredentialId = form.watch("credentialId");
     const currentMcpUrl = form.watch("mcpServerUrl")
     const currentMcpAuth = form.watch("mcpAuthToken")
     const { data, isLoading: isFetchingModels, error } = useSWR(
-        open ? "/api/models/openai" : null,
+        open && selectedCredentialId
+            ? `/api/models/openai?credentialId=${selectedCredentialId}`
+            : null,
         fetcher
     );
 

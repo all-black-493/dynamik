@@ -1,32 +1,17 @@
-import { NextResponse } from "next/server";
+import { createModelsRoute, providerFetch } from "@/features/executions/server/models-route";
+import { CredentialType } from "@/generated/prisma";
 
-export async function GET() {
-    try {
-        const response = await fetch("https://api.deepseek.com/models", {
-            method: "GET",
+export const GET = createModelsRoute({
+    provider: "DeepSeek",
+    type: CredentialType.DEEPSEEK,
+    fetchModels: async (apiKey) => {
+        const data = await providerFetch("DeepSeek", "https://api.deepseek.com/models", {
             headers: {
-                "Accept": "application/json",
-                "Authorization": `Bearer ${process.env.DEEPSEEK_API_KEY}`,
-            },
-        });
+                Accept: "application/json",
+                Authorization: `Bearer ${apiKey}`
+            }
+        })
 
-        if (!response.ok) {
-            throw new Error(`DeepSeek API error: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-
-        // DeepSeek returns an object with a 'data' array containing model objects
-        // Format: { data: [{ id: "deepseek-chat", ... }, { id: "deepseek-reasoner", ... }] }
-        const models = data.data.map((model: any) => model.id);
-
-        return NextResponse.json({ models });
-    } catch (error) {
-        console.error("Failed to fetch DeepSeek models:", error);
-
-        // Fallback to hardcoded IDs if the API call fails or for offline dev
-        return NextResponse.json({
-            models: ["deepseek-chat", "deepseek-reasoner"]
-        });
+        return data.data.map((model: { id: string }) => model.id).sort()
     }
-}
+})
