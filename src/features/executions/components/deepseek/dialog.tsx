@@ -101,10 +101,13 @@ export const DeepseekDialog = ({
     }, [open, defaultValues, form])
 
     const watchVariableName = form.watch("variableName") || "myDeepseek"
+    const selectedCredentialId = form.watch("credentialId");
     const currentMcpUrl = form.watch("mcpServerUrl")
     const currentMcpAuth = form.watch("mcpAuthToken")
     const { data, isLoading: isFetchingModels, error } = useSWR(
-        open ? "/api/models/deepseek" : null,
+        open && selectedCredentialId
+            ? `/api/models/deepseek?credentialId=${selectedCredentialId}`
+            : null,
         fetcher
     );
 

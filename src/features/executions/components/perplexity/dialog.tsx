@@ -98,10 +98,13 @@ export const PerplexityDialog = ({
     }, [open, defaultValues, form])
 
     const watchVariableName = form.watch("variableName") || "myPerplexity"
+    const selectedCredentialId = form.watch("credentialId");
     const currentMcpUrl = form.watch("mcpServerUrl")
     const currentMcpAuth = form.watch("mcpAuthToken")
     const { data, isLoading: isFetchingModels, error } = useSWR(
-        open ? "/api/models/perplexity" : null,
+        open && selectedCredentialId
+            ? `/api/models/perplexity?credentialId=${selectedCredentialId}`
+            : null,
         fetcher
     );
 

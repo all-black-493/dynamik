@@ -100,10 +100,13 @@ export const GrokDialog = ({
     }, [open, defaultValues, form])
 
     const watchVariableName = form.watch("variableName") || "myGrok"
+    const selectedCredentialId = form.watch("credentialId");
     const currentMcpUrl = form.watch("mcpServerUrl")
     const currentMcpAuth = form.watch("mcpAuthToken")
     const { data, isLoading: isFetchingModels, error } = useSWR(
-        open ? "/api/models/grok" : null,
+        open && selectedCredentialId
+            ? `/api/models/grok?credentialId=${selectedCredentialId}`
+            : null,
         fetcher
     );
 
