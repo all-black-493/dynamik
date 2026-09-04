@@ -20,6 +20,7 @@ import { telegramChannel } from "./channels/telegram";
 import { slackChannel } from "./channels/slack";
 import { discordChannel } from "./channels/discord";
 import { whatsappChannel } from "./channels/whatsapp";
+import { salesforceChannel } from "./channels/salesforce";
 
 
 export const executeWorkflow = inngest.createFunction(
@@ -56,6 +57,7 @@ export const executeWorkflow = inngest.createFunction(
             slackChannel(),
             discordChannel(),
             whatsappChannel(),
+            salesforceChannel(),
         ]
     },
 

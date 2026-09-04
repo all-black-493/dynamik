@@ -11,6 +11,7 @@ import { SlackNode } from "@/features/executions/components/slack/node";
 import { TelegramNode } from "@/features/executions/components/telegram/node";
 import { TiktokNode } from "@/features/executions/components/tiktok/node";
 import { WhatsappNode } from "@/features/executions/components/whatsapp/node";
+import { SalesforceNode } from "@/features/executions/components/salesforce/node";
 import GoogleFormTrigger from "@/features/triggers/components/google-form-trigger/node";
 import ManualTriggerNode from "@/features/triggers/components/manual-trigger/node";
 import MPESATrigger from "@/features/triggers/components/MPESA-trigger/node";
@@ -35,7 +36,8 @@ export const nodeComponents = {
     [NodeType.SLACK]:SlackNode,
     [NodeType.TELEGRAM]:TelegramNode,
     [NodeType.TIKTOK]:TiktokNode,
-    [NodeType.WHATSAPP]: WhatsappNode
+    [NodeType.WHATSAPP]: WhatsappNode,
+    [NodeType.SALESFORCE]: SalesforceNode
 
 } as const satisfies NodeTypes
 

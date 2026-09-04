@@ -14,6 +14,8 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import z from "zod"
 import { useCreateCredential, useSuspenseCredential, useUpdateCredential } from "../hooks/use-credentials"
+import { getCredentialFields } from "../lib/credential-fields"
+import { useState } from "react"
 
 // The stored key is never sent to the browser, so an edit leaves the field
 // blank and only submits a value when the user is actually rotating the key.
@@ -78,6 +80,11 @@ const credentialTypeOptions = [
         label: "Whatsapp Access Token",
         logo: "/logos/whatsapp.svg"
     },
+    {
+        value: CredentialType.SALESFORCE,
+        label: "Salesforce",
+        logo: "/logos/salesforce.svg"
+    },
 ]
 
 interface CredentialFormProps {
@@ -97,6 +104,11 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
 
     const isEdit = !!initialData?.id
 
+    // Multi-part credentials (Salesforce, and Odoo later) collect several inputs
+    // and are stored as one JSON object in the encrypted value column.
+    const [fieldValues, setFieldValues] = useState<Record<string, string>>({})
+    const [fieldError, setFieldError] = useState("")
+
     const form = useForm<FormValues>({
         resolver: zodResolver(buildFormSchema(isEdit)),
         defaultValues: {
@@ -106,7 +118,30 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
         }
     })
 
+    const activeFields = getCredentialFields(form.watch("type"))
+
     const onSubmit = async (values: FormValues) => {
+        const spec = getCredentialFields(values.type)
+
+        if (spec) {
+            const missing = spec.filter((field) => !fieldValues[field.key]?.trim())
+
+            // On edit, leaving every field blank keeps the stored credential, the
+            // same way the single-key form does.
+            const untouched = missing.length === spec.length
+
+            if (missing.length && !(isEdit && untouched)) {
+                setFieldError(`Fill in: ${missing.map((f) => f.label).join(", ")}`)
+                return
+            }
+
+            setFieldError("")
+            values = {
+                ...values,
+                value: untouched ? undefined : JSON.stringify(fieldValues)
+            }
+        }
+
         if (isEdit && initialData?.id) {
             await updateCredential.mutateAsync({
                 id: initialData.id,
@@ -201,27 +236,66 @@ export const CredentialForm = ({ initialData }: CredentialFormProps) => {
                                 )}
                             />
 
-                            <FormField
-                                control={form.control}
-                                name="value"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>
-                                            {isEdit ? "API Key (leave blank to keep current)" : "API Key"}
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="password"
-                                                autoComplete="off"
-                                                placeholder={isEdit ? "Unchanged" : "sk-..."}
-                                                {...field}
-                                                value={field.value ?? ""}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            {activeFields ? (
+                                <div className="space-y-6">
+                                    {activeFields.map((credentialField) => (
+                                        <FormItem key={credentialField.key}>
+                                            <FormLabel>
+                                                {credentialField.label}
+                                                {isEdit ? " (leave blank to keep current)" : ""}
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type={credentialField.secret ? "password" : "text"}
+                                                    autoComplete="off"
+                                                    placeholder={
+                                                        isEdit
+                                                            ? "Unchanged"
+                                                            : credentialField.placeholder
+                                                    }
+                                                    value={fieldValues[credentialField.key] ?? ""}
+                                                    onChange={(event) =>
+                                                        setFieldValues((current) => ({
+                                                            ...current,
+                                                            [credentialField.key]: event.target.value
+                                                        }))
+                                                    }
+                                                />
+                                            </FormControl>
+                                            {credentialField.description ? (
+                                                <p className="text-muted-foreground text-sm">
+                                                    {credentialField.description}
+                                                </p>
+                                            ) : null}
+                                        </FormItem>
+                                    ))}
+                                    {fieldError ? (
+                                        <p className="text-destructive text-sm">{fieldError}</p>
+                                    ) : null}
+                                </div>
+                            ) : (
+                                <FormField
+                                    control={form.control}
+                                    name="value"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>
+                                                {isEdit ? "API Key (leave blank to keep current)" : "API Key"}
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="password"
+                                                    autoComplete="off"
+                                                    placeholder={isEdit ? "Unchanged" : "sk-..."}
+                                                    {...field}
+                                                    value={field.value ?? ""}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
 
                             <div className="flex gap-4">
                                 <Button

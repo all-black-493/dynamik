@@ -3,6 +3,7 @@ import "server-only"
 import type { CredentialType } from "@/generated/prisma"
 import prisma from "@/lib/db"
 import { decrypt } from "@/lib/encryption"
+import { parseCredentialValue } from "../lib/credential-fields"
 
 /**
  * Reads a credential's plaintext secret for the owning user.
@@ -32,4 +33,24 @@ export const getDecryptedCredential = async ({
     }
 
     return decrypt(credential.value)
+}
+
+/**
+ * Same as getDecryptedCredential, but for credentials that hold several parts.
+ *
+ * Returns the stored fields as a map. A single-value credential decodes to
+ * `{ value: <key> }`, so callers can share one code path.
+ */
+export const getDecryptedCredentialFields = async (args: {
+    credentialId: string
+    userId: string
+    type: CredentialType
+}): Promise<Record<string, string> | null> => {
+    const raw = await getDecryptedCredential(args)
+
+    if (raw === null) {
+        return null
+    }
+
+    return parseCredentialValue(raw)
 }
