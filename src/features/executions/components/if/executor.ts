@@ -3,20 +3,11 @@ import {
     type Combinator,
     type Condition,
     ConditionError,
-    evaluateConditions,
-    type ResolvedCondition,
-    UNARY_OPERATORS
+    evaluateConditions
 } from "@/features/executions/lib/conditions";
+import { resolveConditions } from "@/features/executions/lib/resolve-conditions";
 import { ifChannel } from "@/inngest/channels/if";
-import Handlebars from "handlebars";
-import { decode } from "html-entities";
 import { NonRetriableError } from "inngest";
-
-Handlebars.registerHelper("json", (context) => {
-    const stringified = JSON.stringify(context, null, 2)
-    const safeString = new Handlebars.SafeString(stringified)
-    return safeString
-})
 
 export const IF_OUTPUT_TRUE = "true"
 export const IF_OUTPUT_FALSE = "false"
@@ -40,18 +31,10 @@ export const ifExecutor: NodeExecutor<ifData> = async ({
     const combinator = data.combinator ?? "AND"
 
     try {
-        const render = (template: string | undefined) =>
-            template ? decode(Handlebars.compile(template)(context)) : ""
-
-        const resolved: ResolvedCondition[] = conditions.map((condition) => ({
-            ...condition,
-            left: render(condition.left),
-            // A unary operator ignores the right side, so it is not rendered and
-            // cannot fail on a template referring to something that is not there.
-            right: UNARY_OPERATORS.has(condition.operator) ? "" : render(condition.right)
-        }))
-
-        const matched = evaluateConditions(resolved, combinator)
+        const matched = evaluateConditions(
+            resolveConditions(conditions, context),
+            combinator
+        )
 
         await publish(ifChannel().status({ nodeId, status: "success" }))
 

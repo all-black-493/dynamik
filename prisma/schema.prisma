@@ -140,6 +140,10 @@ enum NodeType {
   HUBSPOT
   IF
   LOOP
+  SWITCH
+  MERGE
+  FILTER
+  WAIT
 }
 
 model Node {

@@ -22,9 +22,21 @@ export type PlanConnection = {
  * Walking in topological order is what makes this correct in one pass: by the
  * time a node is reached, every node that could have activated it has run.
  */
+export type PlanOptions<TNode> = {
+    /**
+     * Nodes that must not run until every inbound edge has delivered control.
+     *
+     * Correct in a single pass because the walk is topological: by the time a
+     * node is reached, every predecessor has already run or been skipped, so
+     * the answer is final rather than provisional.
+     */
+    requiresAllInputs?: (node: TNode) => boolean
+}
+
 export const createExecutionPlan = <TNode extends SortableNode>(
     nodes: TNode[],
-    connections: PlanConnection[]
+    connections: PlanConnection[],
+    options: PlanOptions<TNode> = {}
 ) => {
     const sorted = topologicalSort(nodes, connections)
 
@@ -59,7 +71,18 @@ export const createExecutionPlan = <TNode extends SortableNode>(
     return {
         sorted,
 
-        isActive: (nodeId: string) => active.has(nodeId),
+        isActive: (nodeId: string) => {
+            if (!active.has(nodeId)) return false
+
+            const node = byId.get(nodeId)
+            if (!node || !options.requiresAllInputs?.(node)) return true
+
+            const edges = incoming.get(nodeId) ?? []
+            if (edges.length === 0) return true
+
+            const seen = arrived.get(nodeId)
+            return edges.every((edge) => seen?.has(edgeKey(edge)))
+        },
 
         /** Records a node the run passed over, for the execution record. */
         skip: (nodeId: string) => {

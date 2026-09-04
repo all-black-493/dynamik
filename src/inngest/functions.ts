@@ -26,6 +26,10 @@ import { salesforceChannel } from "./channels/salesforce";
 import { hubspotChannel } from "./channels/hubspot";
 import { ifChannel } from "./channels/if";
 import { loopChannel } from "./channels/loop";
+import { switchChannel } from "./channels/switch";
+import { mergeChannel } from "./channels/merge";
+import { filterChannel } from "./channels/filter";
+import { waitChannel } from "./channels/wait";
 
 
 export const executeWorkflow = inngest.createFunction(
@@ -66,6 +70,10 @@ export const executeWorkflow = inngest.createFunction(
             hubspotChannel(),
             ifChannel(),
             loopChannel(),
+            switchChannel(),
+            mergeChannel(),
+            filterChannel(),
+            waitChannel(),
         ]
     },
 
@@ -105,7 +113,14 @@ export const executeWorkflow = inngest.createFunction(
                 }
             })
 
-        const plan = createExecutionPlan(graph.nodes, graph.connections)
+        // A node opts into waiting for every inbound branch through its own
+        // data, so the engine stays unaware of which node types do it.
+        const requiresAllInputs = (node: { data: unknown }) =>
+            (node.data as { waitForAll?: boolean } | null)?.waitForAll === true
+
+        const plan = createExecutionPlan(graph.nodes, graph.connections, {
+            requiresAllInputs
+        })
 
         const userId = await step.run("find-user-id", async () => {
             const workflow = await prisma.workflow.findUniqueOrThrow({
@@ -150,7 +165,9 @@ export const executeWorkflow = inngest.createFunction(
                     // Each pass gets a fresh plan so branching inside the body
                     // works, and a fresh view of the outer context so one
                     // iteration cannot leak into the next.
-                    const bodyPlan = createExecutionPlan(body.nodes, body.connections)
+                    const bodyPlan = createExecutionPlan(body.nodes, body.connections, {
+                        requiresAllInputs
+                    })
 
                     let iterationContext: Record<string, unknown> = {
                         ...context,
