@@ -85,6 +85,11 @@ const credentialTypeOptions = [
         label: "Salesforce",
         logo: "/logos/salesforce.svg"
     },
+    {
+        value: CredentialType.HUBSPOT,
+        label: "Hubspot",
+        logo: "/logos/hubspot.svg"
+    },
 ]
 
 interface CredentialFormProps {
