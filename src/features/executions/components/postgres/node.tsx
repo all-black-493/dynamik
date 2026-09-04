@@ -2,7 +2,6 @@
 
 import { POSTGRES_CHANNEL_NAME } from "@/inngest/channels/postgres"
 import { type Node, type NodeProps, useReactFlow } from "@xyflow/react"
-import { DatabaseIcon } from "lucide-react"
 import { memo, useState } from "react"
 import useNodeStatus from "../../hooks/use-node-status"
 import { BaseExecutionNode } from "../base-execution-node"
@@ -50,7 +49,7 @@ export const PostgresNode = memo((props: NodeProps<PostgresNodeType>) => {
             <BaseExecutionNode
                 {...props}
                 id={props.id}
-                icon={DatabaseIcon}
+                icon="/logos/postgresql.svg"
                 name="Postgres"
                 status={nodeStatus}
                 description={description}

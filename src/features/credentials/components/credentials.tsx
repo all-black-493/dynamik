@@ -125,7 +125,7 @@ const credentialLogos: Record<CredentialType, string> = {
     [CredentialType.WHATSAPP_ACCESS_TOKEN]: "/logos/whatsapp.svg",
     [CredentialType.SALESFORCE]: "/logos/salesforce.svg",
     [CredentialType.HUBSPOT]: "/logos/hubspot.svg",
-    [CredentialType.POSTGRES]: "/logos/logo.svg"
+    [CredentialType.POSTGRES]: "/logos/postgresql.svg"
 
 }
 // The encrypted secret is projected out of every credential read, so the list

@@ -4,7 +4,6 @@ import { createId } from "@paralleldrive/cuid2"
 import { useReactFlow } from "@xyflow/react"
 import {
     ClockIcon,
-    DatabaseIcon,
     FilterIcon,
     GitBranchIcon,
     GitMergeIcon,
@@ -179,7 +178,7 @@ export const nodeCategories: NodeCategory[] = [
                 type: NodeType.POSTGRES,
                 label: "Postgres",
                 description: "Query a database, or Redshift",
-                icon: DatabaseIcon
+                icon: "/logos/postgresql.svg"
             }
         ]
     },

@@ -93,7 +93,7 @@ const credentialTypeOptions = [
     {
         value: CredentialType.POSTGRES,
         label: "Postgres",
-        logo: "/logos/logo.svg"
+        logo: "/logos/postgresql.svg"
     },
 ]
 
