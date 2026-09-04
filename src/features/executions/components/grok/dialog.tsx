@@ -385,8 +385,7 @@ export const GrokDialog = ({
                                         />
                                     </FormControl>
                                     <FormDescription>
-                                        The prompt to send to the AI.
-                                        Use {"{{variables}}"} for simple values or {"{{json variable}}"} to stringify objects.
+                                        Supports {"{{variables}}"} and {"{{json variable}}"}.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>

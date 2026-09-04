@@ -72,9 +72,7 @@ export const MergeDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }
                                     <div className="space-y-1 pr-6">
                                         <FormLabel>Wait for every input</FormLabel>
                                         <FormDescription>
-                                            On, this node runs once all incoming connections have
-                                            arrived, so a branch that was never taken stops the merge.
-                                            Off, the first branch to arrive is enough.
+                                            Off, the first branch through is enough.
                                         </FormDescription>
                                     </div>
                                     <FormControl>
@@ -94,8 +92,7 @@ export const MergeDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }
                                         <Input {...field} value={field.value ?? ""} placeholder="myMerge" className="font-mono" />
                                     </FormControl>
                                     <FormDescription>
-                                        Data from every branch is already in the workflow, so this node
-                                        does not copy it. Later nodes read the earlier variables directly.
+                                        Branch data is already available to later nodes.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>

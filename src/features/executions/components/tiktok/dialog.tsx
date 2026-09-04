@@ -200,8 +200,7 @@ export const TiktokDialog = ({
                                         </SelectContent>
                                     </Select>
                                     <FormDescription>
-                                        A user access token, stored as a Tiktok Access Token
-                                        credential. The client key and secret alone cannot post.
+                                        A user access token. The client key and secret cannot post.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -257,8 +256,7 @@ export const TiktokDialog = ({
                                         />
                                     </FormControl>
                                     <FormDescription>
-                                        Tiktok pulls the video from this URL, so its domain must be
-                                        verified in your developer portal. Supports {"{{variables}}"}.
+                                        The domain must be verified with Tiktok. Supports {"{{variables}}"}.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
