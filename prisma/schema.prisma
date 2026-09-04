@@ -101,6 +101,7 @@ enum CredentialType {
   TIKTOK_ACCESS_TOKEN
   WHATSAPP_ACCESS_TOKEN
   SALESFORCE
+  HUBSPOT
 }
 
 model Workflow {
@@ -136,6 +137,7 @@ enum NodeType {
   WHATSAPP
   TIKTOK
   SALESFORCE
+  HUBSPOT
 }
 
 model Node {

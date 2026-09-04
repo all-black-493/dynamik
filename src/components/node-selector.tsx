@@ -135,6 +135,12 @@ const executionNodes: NodeTypeOption[] = [
         label: "Salesforce",
         description: "Query or Update any Salesforce Record",
         icon: "/logos/salesforce.svg"
+    },
+    {
+        type: NodeType.HUBSPOT,
+        label: "Hubspot",
+        description: "Search or Update any Hubspot Record",
+        icon: "/logos/hubspot.svg"
     }
 ]
 
