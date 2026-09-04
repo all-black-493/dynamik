@@ -3,6 +3,7 @@
 import { createId } from "@paralleldrive/cuid2"
 import { useReactFlow } from "@xyflow/react"
 import {
+    GitBranchIcon,
     GlobeIcon,
     MousePointerIcon
 } from "lucide-react"
@@ -141,6 +142,12 @@ const executionNodes: NodeTypeOption[] = [
         label: "Hubspot",
         description: "Search or Update any Hubspot Record",
         icon: "/logos/hubspot.svg"
+    },
+    {
+        type: NodeType.IF,
+        label: "If",
+        description: "Branch on a Condition",
+        icon: GitBranchIcon
     }
 ]
 

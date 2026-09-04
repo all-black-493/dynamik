@@ -18,6 +18,12 @@ interface BaseExecutionNodeProps extends NodeProps {
     status?: NodeStatus
     onSettings?: () => void
     onDoubleClick?: () => void
+    /**
+     * Named outputs for a branching node. The handle id becomes the connection's
+     * fromOutput, which is what the engine matches when deciding which edges to
+     * follow. Omitted for ordinary nodes, which get one unnamed output.
+     */
+    outputs?: { id: string; label: string }[]
 }
 
 export const BaseExecutionNode = memo(({
@@ -28,7 +34,8 @@ export const BaseExecutionNode = memo(({
     children,
     status = "initial",
     onSettings,
-    onDoubleClick
+    onDoubleClick,
+    outputs
 }: BaseExecutionNodeProps) => {
 
     const { setNodes, setEdges } = useReactFlow()
@@ -69,11 +76,29 @@ export const BaseExecutionNode = memo(({
                             type="target"
                             position={Position.Left}
                         />
-                        <BaseHandle
-                            id="source-1"
-                            type="source"
-                            position={Position.Right}
-                        />
+                        {outputs?.length ? (
+                            outputs.map((output, index) => (
+                                <BaseHandle
+                                    key={output.id}
+                                    id={output.id}
+                                    type="source"
+                                    position={Position.Right}
+                                    style={{
+                                        top: `${((index + 1) * 100) / (outputs.length + 1)}%`
+                                    }}
+                                >
+                                    <span className="pointer-events-none absolute left-4 -translate-y-1/2 top-1/2 text-[10px] font-medium text-muted-foreground">
+                                        {output.label}
+                                    </span>
+                                </BaseHandle>
+                            ))
+                        ) : (
+                            <BaseHandle
+                                id="source-1"
+                                type="source"
+                                position={Position.Right}
+                            />
+                        )}
                     </BaseNodeContent>
                 </BaseNode>
             </NodeStatusIndicator>
