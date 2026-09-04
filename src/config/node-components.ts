@@ -14,6 +14,7 @@ import { WhatsappNode } from "@/features/executions/components/whatsapp/node";
 import { SalesforceNode } from "@/features/executions/components/salesforce/node";
 import { HubspotNode } from "@/features/executions/components/hubspot/node";
 import { IfNode } from "@/features/executions/components/if/node";
+import { LoopNode } from "@/features/executions/components/loop/node";
 import GoogleFormTrigger from "@/features/triggers/components/google-form-trigger/node";
 import ManualTriggerNode from "@/features/triggers/components/manual-trigger/node";
 import MPESATrigger from "@/features/triggers/components/MPESA-trigger/node";
@@ -41,7 +42,8 @@ export const nodeComponents = {
     [NodeType.WHATSAPP]: WhatsappNode,
     [NodeType.SALESFORCE]: SalesforceNode,
     [NodeType.HUBSPOT]: HubspotNode,
-    [NodeType.IF]: IfNode
+    [NodeType.IF]: IfNode,
+    [NodeType.LOOP]: LoopNode
 
 } as const satisfies NodeTypes
 

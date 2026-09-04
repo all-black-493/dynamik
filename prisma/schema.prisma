@@ -139,6 +139,7 @@ enum NodeType {
   SALESFORCE
   HUBSPOT
   IF
+  LOOP
 }
 
 model Node {

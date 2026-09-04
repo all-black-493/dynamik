@@ -19,6 +19,7 @@ import { whatsappExecutor } from "../components/whatsapp/executor";
 import { salesforceExecutor } from "../components/salesforce/executor";
 import { hubspotExecutor } from "../components/hubspot/executor";
 import { ifExecutor } from "../components/if/executor";
+import { loopExecutor } from "../components/loop/executor";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.INITIAL]: manualTriggerExecutor,
@@ -40,7 +41,8 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.WHATSAPP]: whatsappExecutor,
     [NodeType.SALESFORCE]: salesforceExecutor,
     [NodeType.HUBSPOT]: hubspotExecutor,
-    [NodeType.IF]: ifExecutor
+    [NodeType.IF]: ifExecutor,
+    [NodeType.LOOP]: loopExecutor
 }
 
 export const getExecutor = (type: NodeType): NodeExecutor => {
