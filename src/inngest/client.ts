@@ -12,7 +12,7 @@ type AppEvents = {
 
 // Create a client to send and receive events
 export const inngest = new Inngest({
-    id: "dynamiq",
+    id: "dynamik",
     middleware: [realtimeMiddleware()],
     schemas: new EventSchemas().fromRecord<AppEvents>(),
 });
