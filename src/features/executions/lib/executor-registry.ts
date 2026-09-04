@@ -25,6 +25,7 @@ import { mergeExecutor } from "../components/merge/executor";
 import { filterExecutor } from "../components/filter/executor";
 import { waitExecutor } from "../components/wait/executor";
 import { postgresExecutor } from "../components/postgres/executor";
+import { displayExecutor } from "../components/display/executor";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.INITIAL]: manualTriggerExecutor,
@@ -52,7 +53,8 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.MERGE]: mergeExecutor,
     [NodeType.FILTER]: filterExecutor,
     [NodeType.WAIT]: waitExecutor,
-    [NodeType.POSTGRES]: postgresExecutor
+    [NodeType.POSTGRES]: postgresExecutor,
+    [NodeType.DISPLAY]: displayExecutor
 }
 
 export const getExecutor = (type: NodeType): NodeExecutor => {
