@@ -123,9 +123,11 @@ const credentialLogos: Record<CredentialType, string> = {
     [CredentialType.TIKTOK_CLIENT_SECRET]: "/logos/tiktok.svg"
 
 }
+// The encrypted secret is projected out of every credential read, so the list
+// item works from the metadata alone.
 export const CredentialItem = ({
     data
-}: { data: Credential }) => {
+}: { data: Omit<Credential, "value"> }) => {
 
     const removeCredential = useRemoveCredential()
     const handleRemove = () => {

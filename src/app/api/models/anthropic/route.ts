@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { caller } from "@/trpc/server";
 import { CredentialType } from "@/generated/prisma";
+import { getDecryptedCredential } from "@/features/credentials/server/get-credential";
+import { requireAuth } from "@/lib/auth-utils";
 
 export async function GET(request: Request) {
     try {
@@ -15,20 +16,20 @@ export async function GET(request: Request) {
             );
         }
 
-        const credentials = await caller.credentials.getByType({
+        const session = await requireAuth();
+
+        const apiKey = await getDecryptedCredential({
+            credentialId,
+            userId: session.user.id,
             type: CredentialType.ANTHROPIC,
         });
 
-        const credential = credentials.find(c => c.id === credentialId);
-
-        if (!credential) {
+        if (!apiKey) {
             return NextResponse.json(
                 { error: "API key not found" },
                 { status: 404 }
             );
         }
-
-        const apiKey = credential.value;
 
         const response = await fetch("https://api.anthropic.com/v1/models", {
             headers: {

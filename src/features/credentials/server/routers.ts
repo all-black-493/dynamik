@@ -5,6 +5,17 @@ import { encrypt } from "@/lib/encryption";
 import { createTRPCRouter, premiumProcedure, protectedProcedure } from "@/trpc/init";
 import z from "zod";
 
+// The encrypted secret never leaves the server. Every read path selects
+// through this projection so a new query cannot leak `value` by omission.
+const credentialFields = {
+    id: true,
+    name: true,
+    type: true,
+    createdAt: true,
+    updatedAt: true,
+    userId: true
+} as const
+
 export const credentialsRouter = createTRPCRouter({
 
     create: premiumProcedure
@@ -22,8 +33,9 @@ export const credentialsRouter = createTRPCRouter({
                     name,
                     userId: ctx.auth.user.id,
                     type,
-                    value: encrypt(value), //Encrypt
+                    value: encrypt(value),
                 },
+                select: credentialFields
             })
         }),
 
@@ -36,7 +48,8 @@ export const credentialsRouter = createTRPCRouter({
                 where: {
                     id: input.id,
                     userId: ctx.auth.user.id
-                }
+                },
+                select: credentialFields
             })
         }),
 
@@ -46,7 +59,7 @@ export const credentialsRouter = createTRPCRouter({
                 id: z.string(),
                 name: z.string().min(1, "Name is required"),
                 type: z.enum(CredentialType),
-                value: z.string().min(1, "Value is required")
+                value: z.string().min(1).optional()
             }))
         .mutation(async ({ ctx, input }) => {
             const { id, name, type, value } = input
@@ -56,8 +69,11 @@ export const credentialsRouter = createTRPCRouter({
                 data: {
                     name,
                     type,
-                    value: encrypt(value)
-                }
+                    // Omitted value means "keep the stored secret", so editing a
+                    // credential's name never requires round-tripping the key.
+                    ...(value ? { value: encrypt(value) } : {})
+                },
+                select: credentialFields
             })
         }),
 
@@ -70,6 +86,7 @@ export const credentialsRouter = createTRPCRouter({
                     id: input.id,
                     userId: ctx.auth.user.id
                 },
+                select: credentialFields
             })
 
         }),
@@ -101,13 +118,7 @@ export const credentialsRouter = createTRPCRouter({
                     orderBy: {
                         updatedAt: "desc",
                     },
-                    // select: {
-                    //     id: true,
-                    //     name: true,
-                    //     type: true,
-                    //     createdAt: true,
-                    //     updatedAt: true
-                    // }
+                    select: credentialFields
                 }),
                 prisma.credential.count({
                     where: {
@@ -149,7 +160,8 @@ export const credentialsRouter = createTRPCRouter({
                 where: { type, userId: ctx.auth.user.id },
                 orderBy: {
                     updatedAt: "desc"
-                }
+                },
+                select: credentialFields
             })
         })
 })
