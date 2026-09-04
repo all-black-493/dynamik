@@ -114,11 +114,30 @@ http://localhost:8288.
 | `NEXT_PUBLIC_APP_URL` | Public base URL of the app |
 | `ENCRYPTION_KEY` | Key used to encrypt stored credentials at rest |
 | `NGROK_URL` | Reserved ngrok domain for webhook triggers |
+| `INNGEST_EVENT_KEY` | Sends events to Inngest. Required in production |
+| `INNGEST_SIGNING_KEY` | Lets Inngest call back into `/api/inngest`. Required in production |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | GitHub sign-in |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google sign-in |
 | `POLAR_ACCESS_TOKEN` / `POLAR_SUCCESS_URL` | Subscription checkout |
 | `MPESA_CONSUMER_KEY` / `MPESA_CONSUMER_SECRET` / `MPESA_PASSKEY` / `MPESA_SHORTCODE` / `MPESA_ENVIRONMENT` | M-Pesa trigger |
 | `SENTRY_AUTH_TOKEN` | Source map upload at build time |
+
+### Deploying
+
+Local development needs no Inngest keys: `npm run inngest:dev` runs a dev server
+and the SDK talks to it directly. Production is different, and the failure mode is
+not obvious.
+
+1. Set `INNGEST_EVENT_KEY` and `INNGEST_SIGNING_KEY` in the host's environment,
+   from the Inngest dashboard under Manage. Without the event key, a deployed app
+   builds and serves fine but every run fails at the moment you press Execute with
+   `We couldn't find an event key to use to send events to Inngest`.
+2. Sync the app with Inngest so it knows where to call back. Point it at
+   `https://<your-domain>/api/inngest`. On Vercel the Inngest integration does both
+   steps and re-syncs on each deploy.
+
+The app registers itself under the `id` set in `src/inngest/client.ts`. Changing
+that id creates a separate app in Inngest rather than renaming the existing one.
 
 ### Credentials
 
