@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "CredentialType" ADD VALUE 'TIKTOK_ACCESS_TOKEN';
