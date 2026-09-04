@@ -146,6 +146,7 @@ enum NodeType {
   FILTER
   WAIT
   POSTGRES
+  DISPLAY
 }
 
 model Node {
