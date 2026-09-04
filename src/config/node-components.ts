@@ -15,6 +15,10 @@ import { SalesforceNode } from "@/features/executions/components/salesforce/node
 import { HubspotNode } from "@/features/executions/components/hubspot/node";
 import { IfNode } from "@/features/executions/components/if/node";
 import { LoopNode } from "@/features/executions/components/loop/node";
+import { SwitchNode } from "@/features/executions/components/switch/node";
+import { MergeNode } from "@/features/executions/components/merge/node";
+import { FilterNode } from "@/features/executions/components/filter/node";
+import { WaitNode } from "@/features/executions/components/wait/node";
 import GoogleFormTrigger from "@/features/triggers/components/google-form-trigger/node";
 import ManualTriggerNode from "@/features/triggers/components/manual-trigger/node";
 import MPESATrigger from "@/features/triggers/components/MPESA-trigger/node";
@@ -43,7 +47,11 @@ export const nodeComponents = {
     [NodeType.SALESFORCE]: SalesforceNode,
     [NodeType.HUBSPOT]: HubspotNode,
     [NodeType.IF]: IfNode,
-    [NodeType.LOOP]: LoopNode
+    [NodeType.LOOP]: LoopNode,
+    [NodeType.SWITCH]: SwitchNode,
+    [NodeType.MERGE]: MergeNode,
+    [NodeType.FILTER]: FilterNode,
+    [NodeType.WAIT]: WaitNode
 
 } as const satisfies NodeTypes
 

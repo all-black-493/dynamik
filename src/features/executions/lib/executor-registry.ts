@@ -20,6 +20,10 @@ import { salesforceExecutor } from "../components/salesforce/executor";
 import { hubspotExecutor } from "../components/hubspot/executor";
 import { ifExecutor } from "../components/if/executor";
 import { loopExecutor } from "../components/loop/executor";
+import { switchExecutor } from "../components/switch/executor";
+import { mergeExecutor } from "../components/merge/executor";
+import { filterExecutor } from "../components/filter/executor";
+import { waitExecutor } from "../components/wait/executor";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.INITIAL]: manualTriggerExecutor,
@@ -42,7 +46,11 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.SALESFORCE]: salesforceExecutor,
     [NodeType.HUBSPOT]: hubspotExecutor,
     [NodeType.IF]: ifExecutor,
-    [NodeType.LOOP]: loopExecutor
+    [NodeType.LOOP]: loopExecutor,
+    [NodeType.SWITCH]: switchExecutor,
+    [NodeType.MERGE]: mergeExecutor,
+    [NodeType.FILTER]: filterExecutor,
+    [NodeType.WAIT]: waitExecutor
 }
 
 export const getExecutor = (type: NodeType): NodeExecutor => {

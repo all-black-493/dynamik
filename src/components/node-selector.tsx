@@ -3,10 +3,14 @@
 import { createId } from "@paralleldrive/cuid2"
 import { useReactFlow } from "@xyflow/react"
 import {
+    ClockIcon,
+    FilterIcon,
     GitBranchIcon,
+    GitMergeIcon,
     GlobeIcon,
     MousePointerIcon,
-    RepeatIcon
+    RepeatIcon,
+    SplitIcon
 } from "lucide-react"
 import { useCallback } from "react"
 import { toast } from "sonner"
@@ -155,6 +159,30 @@ const executionNodes: NodeTypeOption[] = [
         label: "Loop",
         description: "Repeat Nodes for each Item in a List",
         icon: RepeatIcon
+    },
+    {
+        type: NodeType.SWITCH,
+        label: "Switch",
+        description: "Route down One of Several Paths",
+        icon: SplitIcon
+    },
+    {
+        type: NodeType.MERGE,
+        label: "Merge",
+        description: "Rejoin Branches",
+        icon: GitMergeIcon
+    },
+    {
+        type: NodeType.FILTER,
+        label: "Filter",
+        description: "Continue only if Conditions Hold",
+        icon: FilterIcon
+    },
+    {
+        type: NodeType.WAIT,
+        label: "Wait",
+        description: "Pause the Run",
+        icon: ClockIcon
     }
 ]
 
