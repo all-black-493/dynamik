@@ -8,6 +8,7 @@ import {
     GitBranchIcon,
     GitMergeIcon,
     GlobeIcon,
+    MonitorIcon,
     MousePointerIcon,
     RepeatIcon,
     SplitIcon
@@ -179,6 +180,12 @@ export const nodeCategories: NodeCategory[] = [
                 label: "Postgres",
                 description: "Query a database, or Redshift",
                 icon: "/logos/postgresql.svg"
+            },
+            {
+                type: NodeType.DISPLAY,
+                label: "Display",
+                description: "Show a result on the canvas",
+                icon: MonitorIcon
             }
         ]
     },
