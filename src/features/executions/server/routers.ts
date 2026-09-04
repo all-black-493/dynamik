@@ -27,6 +27,30 @@ export const executionsRouter = createTRPCRouter({
 
         }),
 
+    // The editor polls this to know whether a run is still in flight. Node
+    // status arrives over realtime, but the canvas needs a source of truth that
+    // survives a reload or a dropped subscription.
+    getLatestForWorkflow: protectedProcedure
+        .input(z.object({ workflowId: z.string() }))
+        .query(async ({ ctx, input }) => {
+            return prisma.execution.findFirst({
+                where: {
+                    workflowId: input.workflowId,
+                    workflow: {
+                        userId: ctx.auth.user.id
+                    }
+                },
+                orderBy: { startedAt: "desc" },
+                select: {
+                    id: true,
+                    status: true,
+                    startedAt: true,
+                    completedAt: true,
+                    error: true
+                }
+            })
+        }),
+
     getMany: protectedProcedure
         .input(z.object({
             page: z.number().default(PAGINATION.DEFAULT_PAGE),

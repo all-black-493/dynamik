@@ -19,10 +19,18 @@ function useNodeStatus({
 }: UseNodeStatusOptions) {
 
     const [status, setStatus] = useState<NodeStatus>("initial")
-    const { data } = useInngestSubscription({
+    const { data, error } = useInngestSubscription({
         refreshToken,
         enabled: true
     })
+
+    // A subscription that never connects looks exactly like a workflow that
+    // never ran: the node just sits on "initial". Surface it instead.
+    useEffect(() => {
+        if (error) {
+            console.error(`[realtime] ${channel} subscription failed:`, error)
+        }
+    }, [error, channel])
 
     useEffect(() => {
         if (!data?.length) {
