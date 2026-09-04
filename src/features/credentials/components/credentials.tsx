@@ -122,7 +122,8 @@ const credentialLogos: Record<CredentialType, string> = {
     [CredentialType.TIKTOK_CLIENT_KEY]: "/logos/tiktok.svg",
     [CredentialType.TIKTOK_CLIENT_SECRET]: "/logos/tiktok.svg",
     [CredentialType.TIKTOK_ACCESS_TOKEN]: "/logos/tiktok.svg",
-    [CredentialType.WHATSAPP_ACCESS_TOKEN]: "/logos/whatsapp.svg"
+    [CredentialType.WHATSAPP_ACCESS_TOKEN]: "/logos/whatsapp.svg",
+    [CredentialType.SALESFORCE]: "/logos/salesforce.svg"
 
 }
 // The encrypted secret is projected out of every credential read, so the list

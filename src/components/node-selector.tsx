@@ -129,6 +129,12 @@ const executionNodes: NodeTypeOption[] = [
         label: "Whatsapp",
         description: "Send a Message to Whatsapp",
         icon: "/logos/whatsapp.svg"
+    },
+    {
+        type: NodeType.SALESFORCE,
+        label: "Salesforce",
+        description: "Query or Update any Salesforce Record",
+        icon: "/logos/salesforce.svg"
     }
 ]
 
