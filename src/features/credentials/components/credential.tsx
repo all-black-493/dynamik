@@ -65,6 +65,11 @@ const credentialTypeOptions = [
         logo: "/logos/tiktok.svg"
     },
     {
+        value: CredentialType.TIKTOK_ACCESS_TOKEN,
+        label: "Tiktok Access Token",
+        logo: "/logos/tiktok.svg"
+    },
+    {
         value: CredentialType.WHATSAPP_ACCESS_TOKEN,
         label: "Whatsapp Access Token",
         logo: "/logos/whatsapp.svg"

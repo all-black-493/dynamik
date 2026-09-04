@@ -115,7 +115,7 @@ const executionNodes: NodeTypeOption[] = [
     {
         type: NodeType.TIKTOK,
         label: "Tiktok",
-        description: "Send a Message to Tiktok",
+        description: "Post a Video to Tiktok",
         icon: "/logos/tiktok.svg"
     },
     {

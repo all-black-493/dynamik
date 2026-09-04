@@ -121,6 +121,7 @@ const credentialLogos: Record<CredentialType, string> = {
     [CredentialType.GROK]: "/logos/grok.svg",
     [CredentialType.TIKTOK_CLIENT_KEY]: "/logos/tiktok.svg",
     [CredentialType.TIKTOK_CLIENT_SECRET]: "/logos/tiktok.svg",
+    [CredentialType.TIKTOK_ACCESS_TOKEN]: "/logos/tiktok.svg",
     [CredentialType.WHATSAPP_ACCESS_TOKEN]: "/logos/whatsapp.svg"
 
 }
