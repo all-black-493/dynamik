@@ -30,6 +30,7 @@ import { switchChannel } from "./channels/switch";
 import { mergeChannel } from "./channels/merge";
 import { filterChannel } from "./channels/filter";
 import { waitChannel } from "./channels/wait";
+import { postgresChannel } from "./channels/postgres";
 
 
 export const executeWorkflow = inngest.createFunction(
@@ -74,6 +75,7 @@ export const executeWorkflow = inngest.createFunction(
             mergeChannel(),
             filterChannel(),
             waitChannel(),
+            postgresChannel(),
         ]
     },
 
