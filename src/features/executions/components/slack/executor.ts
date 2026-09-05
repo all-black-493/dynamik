@@ -81,7 +81,7 @@ export const slackExecutor: NodeExecutor<slackData> = async ({
             return {
                 ...context,
                 [data.variableName]: {
-                    discordMessageSent: true,
+                    slackMessageSent: true,
                     messageContent: content.slice(0, 2000)
                 }
             }

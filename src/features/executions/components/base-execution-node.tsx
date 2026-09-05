@@ -3,7 +3,7 @@
 import { Position, useReactFlow, type NodeProps } from "@xyflow/react"
 import type { LucideIcon } from "lucide-react"
 import Image from "next/image"
-import { memo, type ReactNode, useCallback } from "react"
+import { memo, type ReactNode } from "react"
 import { BaseNode, BaseNodeContent } from "../../../components/react-flow/base-node"
 import { BaseHandle } from "../../../components/react-flow/base-handle"
 import WorkflowNode from "../../../components/workflow-node"
@@ -24,6 +24,13 @@ interface BaseExecutionNodeProps extends NodeProps {
      * follow. Omitted for ordinary nodes, which get one unnamed output.
      */
     outputs?: { id: string; label: string }[]
+    /**
+     * Hides the output handle entirely, for a node nothing can follow.
+     *
+     * The canvas is the contract here: a node with no outgoing connection point
+     * cannot be wired onwards, so the shape of the graph says what the node is.
+     */
+    terminal?: boolean
 }
 
 export const BaseExecutionNode = memo(({
@@ -35,7 +42,8 @@ export const BaseExecutionNode = memo(({
     status = "initial",
     onSettings,
     onDoubleClick,
-    outputs
+    outputs,
+    terminal
 }: BaseExecutionNodeProps) => {
 
     const { setNodes, setEdges } = useReactFlow()
@@ -76,7 +84,7 @@ export const BaseExecutionNode = memo(({
                             type="target"
                             position={Position.Left}
                         />
-                        {outputs?.length ? (
+                        {terminal ? null : outputs?.length ? (
                             outputs.map((output, index) => (
                                 <BaseHandle
                                     key={output.id}

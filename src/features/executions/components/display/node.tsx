@@ -49,6 +49,7 @@ export const DisplayNode = memo((props: NodeProps<DisplayNodeType>) => {
                 description={description}
                 onSettings={() => SetDialogOpen(true)}
                 onDoubleClick={() => SetDialogOpen(true)}
+                terminal
             >
                 {output && (
                     <div className="nodrag nowheel w-[320px] cursor-auto overflow-hidden rounded-md border bg-background p-2">
