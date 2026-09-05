@@ -1,4 +1,4 @@
-import type { NodeExecutor } from "@/features/executions/lib/types";
+import { branch, type NodeExecutor } from "@/features/executions/lib/types";
 import {
     type DisplayKind,
     inferTypedValue,
@@ -117,9 +117,14 @@ export const displayExecutor: NodeExecutor<displayData> = async ({
     await publish(displayChannel().output({ nodeId, title, value }))
     await publish(displayChannel().status({ nodeId, status: "success" }))
 
-    // Also written into the context so it lands in the execution record, which
-    // is what lets the run be reviewed after the fact rather than only watched.
-    return data.variableName
+    const next = data.variableName
+        // Also written into the context so it lands in the execution record,
+        // which is what lets a run be reviewed rather than only watched.
         ? { ...context, [data.variableName]: { title, display: value } }
         : context
+
+    // Terminal: this is where a run ends. Selecting no outputs means anything
+    // wired after it, including edges drawn before the node became terminal,
+    // is left alone rather than running behind the final result.
+    return branch(next, [])
 }

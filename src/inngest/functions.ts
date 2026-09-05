@@ -33,6 +33,7 @@ import { waitChannel } from "./channels/wait";
 import { postgresChannel } from "./channels/postgres";
 import { displayChannel } from "./channels/display";
 import { odooChannel } from "./channels/odoo";
+import { codeChannel } from "./channels/code";
 
 
 export const executeWorkflow = inngest.createFunction(
@@ -80,6 +81,7 @@ export const executeWorkflow = inngest.createFunction(
             postgresChannel(),
             displayChannel(),
             odooChannel(),
+            codeChannel(),
         ]
     },
 
