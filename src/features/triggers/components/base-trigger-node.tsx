@@ -3,9 +3,10 @@
 import { Position, useReactFlow, type NodeProps } from "@xyflow/react"
 import type { LucideIcon } from "lucide-react"
 import Image from "next/image"
-import { memo, type ReactNode, useCallback } from "react"
+import { memo, type ReactNode } from "react"
 import { BaseNode, BaseNodeContent } from "../../../components/react-flow/base-node"
 import { BaseHandle } from "../../../components/react-flow/base-handle"
+import { DEFAULT_OUTPUT } from "@/features/executions/lib/outputs"
 import WorkflowNode from "../../../components/workflow-node"
 import { type NodeStatus, NodeStatusIndicator } from "@/components/react-flow/node-status-indicator"
 
@@ -76,7 +77,7 @@ export const BaseTriggerNode = memo(({
                         {children}
 
                         <BaseHandle
-                            id="source-1"
+                            id={DEFAULT_OUTPUT}
                             type="source"
                             position={Position.Right}
                         />
