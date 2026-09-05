@@ -26,6 +26,7 @@ import { CodeNode } from "@/features/executions/components/code/node";
 import { AiAgentNode } from "@/features/executions/components/ai-agent/node";
 import { AiModelNode } from "@/features/executions/components/ai-model/node";
 import { AiToolNode } from "@/features/executions/components/ai-tool/node";
+import ScheduleTriggerNode from "@/features/triggers/components/schedule-trigger/node";
 import GoogleFormTrigger from "@/features/triggers/components/google-form-trigger/node";
 import ManualTriggerNode from "@/features/triggers/components/manual-trigger/node";
 import MPESATrigger from "@/features/triggers/components/MPESA-trigger/node";
@@ -65,7 +66,8 @@ export const nodeComponents = {
     [NodeType.CODE]: CodeNode,
     [NodeType.AI_AGENT]: AiAgentNode,
     [NodeType.AI_MODEL]: AiModelNode,
-    [NodeType.AI_TOOL]: AiToolNode
+    [NodeType.AI_TOOL]: AiToolNode,
+    [NodeType.SCHEDULE_TRIGGER]: ScheduleTriggerNode
 
 } as const satisfies NodeTypes
 

@@ -35,6 +35,7 @@ import { displayChannel } from "./channels/display";
 import { odooChannel } from "./channels/odoo";
 import { codeChannel } from "./channels/code";
 import { aiAgentChannel } from "./channels/ai-agent";
+import { scheduleTriggerChannel } from "./channels/schedule-trigger";
 
 
 export const executeWorkflow = inngest.createFunction(
@@ -88,6 +89,7 @@ export const executeWorkflow = inngest.createFunction(
             odooChannel(),
             codeChannel(),
             aiAgentChannel(),
+            scheduleTriggerChannel(),
         ]
     },
 

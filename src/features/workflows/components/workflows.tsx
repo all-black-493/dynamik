@@ -2,6 +2,7 @@
 
 import { formatDistanceToNow } from "date-fns"
 import { EmptyView, EntityContainer, EntityHeader, EntityItem, EntityList, EntityPagination, EntitySearch, ErrorView, LoadingView } from "@/components/entity-components"
+import { TemplatePicker } from "./template-picker"
 import { useCreateWorkflow, useRemoveWorkflow, useSuspenseWorkflows } from "../hooks/use-workflows"
 import { useUpgradeModal } from "@/hooks/use-upgrade-modal"
 import { useRouter } from "next/navigation"
@@ -66,6 +67,7 @@ export const WorkflowsHeader = ({ disabled }: { disabled?: boolean }) => {
                 newButtonLabel="New workflow"
                 disabled={disabled}
                 isCreating={createWorkflow.isPending}
+                actions={<TemplatePicker />}
             />
         </>
     )

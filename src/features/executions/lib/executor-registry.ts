@@ -31,6 +31,7 @@ import { codeExecutor } from "../components/code/executor";
 import { aiAgentExecutor } from "../components/ai-agent/executor";
 import { aiModelExecutor } from "../components/ai-model/executor";
 import { aiToolExecutor } from "../components/ai-tool/executor";
+import { scheduleTriggerExecutor } from "@/features/triggers/components/schedule-trigger/executor";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.INITIAL]: manualTriggerExecutor,
@@ -64,7 +65,8 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.CODE]: codeExecutor,
     [NodeType.AI_AGENT]: aiAgentExecutor,
     [NodeType.AI_MODEL]: aiModelExecutor,
-    [NodeType.AI_TOOL]: aiToolExecutor
+    [NodeType.AI_TOOL]: aiToolExecutor,
+    [NodeType.SCHEDULE_TRIGGER]: scheduleTriggerExecutor
 }
 
 export const getExecutor = (type: NodeType): NodeExecutor => {
