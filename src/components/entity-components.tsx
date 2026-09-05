@@ -21,7 +21,9 @@ type EntityHeaderProps = {
     description?: string;
     newButtonLabel?: string;
     disabled?: boolean;
-    isCreating?: boolean
+    isCreating?: boolean;
+    /** Rendered beside the primary button, for a secondary way in. */
+    actions?: React.ReactNode
 } & (
         | { onNew: () => void; newButtonHref?: never }
         | { newButtonHref: string; onNew?: never }
@@ -36,6 +38,7 @@ export const EntityHeader = ({
     isCreating,
     onNew,
     newButtonHref,
+    actions,
 }: EntityHeaderProps) => {
     return (
         <div className="flex flex-row items-center justify-between gap-x-4">
@@ -51,6 +54,8 @@ export const EntityHeader = ({
                     )
                 }
             </div>
+            <div className="flex items-center gap-2">
+            {actions}
             {
                 onNew && !newButtonHref && (
                     <Button
@@ -78,6 +83,7 @@ export const EntityHeader = ({
                     </Button>
                 )
             }
+            </div>
         </div>
     )
 }

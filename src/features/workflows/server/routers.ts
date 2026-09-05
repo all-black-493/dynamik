@@ -1,11 +1,14 @@
 import { PAGINATION } from "@/config/constants";
-import { NodeType } from "@/generated/prisma";
+import { createId } from "@paralleldrive/cuid2";
+import { TRPCError } from "@trpc/server";
+import { NodeType, Prisma } from "@/generated/prisma";
 import type { Node, Edge } from "@xyflow/react";
 import prisma from "@/lib/db";
 import { createTRPCRouter, premiumProcedure, protectedProcedure } from "@/trpc/init";
+import { DEFAULT_OUTPUT } from "@/features/executions/lib/outputs";
+import { getTemplate, templates } from "../lib/templates";
 import { generateSlug } from "random-word-slugs";
 import z from "zod";
-import { inngest } from "@/inngest/client";
 import { sendWorkflowExecution } from "@/inngest/utils";
 
 export const workflowsRouter = createTRPCRouter({
@@ -45,6 +48,70 @@ export const workflowsRouter = createTRPCRouter({
             },
         })
     }),
+
+    listTemplates: protectedProcedure.query(() =>
+        templates.map((template) => ({
+            id: template.id,
+            name: template.name,
+            summary: template.summary,
+            requires: template.requires,
+            nodeCount: template.nodes.length
+        }))
+    ),
+
+    createFromTemplate: premiumProcedure
+        .input(z.object({ templateId: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            const template = getTemplate(input.templateId)
+
+            if (!template) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "That template no longer exists"
+                })
+            }
+
+            // Template keys are local to the definition, so every instance gets
+            // fresh ids and the same template can be used repeatedly.
+            const idFor = new Map(
+                template.nodes.map((node) => [node.key, createId()])
+            )
+
+            return prisma.$transaction(async (tx) => {
+                const workflow = await tx.workflow.create({
+                    data: {
+                        name: template.name,
+                        userId: ctx.auth.user.id
+                    }
+                })
+
+                await tx.node.createMany({
+                    data: template.nodes.map((node) => ({
+                        id: idFor.get(node.key) as string,
+                        workflowId: workflow.id,
+                        name: node.type,
+                        type: node.type,
+                        position: node.position as Prisma.InputJsonValue,
+                        data: (node.data ?? {}) as Prisma.InputJsonValue,
+                        parentNodeId: node.parentKey
+                            ? (idFor.get(node.parentKey) as string)
+                            : null
+                    }))
+                })
+
+                await tx.connection.createMany({
+                    data: template.connections.map((connection) => ({
+                        workflowId: workflow.id,
+                        fromNodeId: idFor.get(connection.from) as string,
+                        toNodeId: idFor.get(connection.to) as string,
+                        fromOutput: connection.fromOutput ?? DEFAULT_OUTPUT,
+                        toInput: DEFAULT_OUTPUT
+                    }))
+                })
+
+                return workflow
+            })
+        }),
 
     remove: protectedProcedure
         .input(z.object({

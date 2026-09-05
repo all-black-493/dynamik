@@ -54,6 +54,7 @@ next-env.d.ts
 /*.out
 /*.synctex.gz
 /*.fdb_latexmk
+/*.log
 
 # process runner log
 /mprocs.log

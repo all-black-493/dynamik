@@ -4,6 +4,7 @@ import { createId } from "@paralleldrive/cuid2"
 import { useReactFlow } from "@xyflow/react"
 import {
     BotIcon,
+    CalendarClockIcon,
     ClockIcon,
     CodeIcon,
     FilterIcon,
@@ -59,6 +60,12 @@ export const nodeCategories: NodeCategory[] = [
                 label: "Trigger manually",
                 description: "Run it yourself, from the editor",
                 icon: MousePointerIcon
+            },
+            {
+                type: NodeType.SCHEDULE_TRIGGER,
+                label: "On a schedule",
+                description: "Every hour, every weekday, whenever",
+                icon: CalendarClockIcon
             },
             {
                 type: NodeType.GOOGLE_FORM_TRIGGER,
