@@ -10,6 +10,12 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
+import {
+    CODE_LANGUAGES,
+    CODE_SAMPLES,
+    type CodeLanguage
+} from "@/features/executions/lib/code-languages"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { z } from "zod"
 
 // CodeMirror reaches for the DOM on import, so it is loaded in the browser only.
@@ -23,18 +29,12 @@ const CodeEditor = dynamic(
     }
 )
 
-const SAMPLE = `// input holds every variable from earlier nodes
-const rows = input.myQuery?.rows ?? [];
-
-return rows
-  .filter(row => row.total > 100)
-  .map(row => ({ id: row.id, total: row.total }));`
-
 const formSchema = z.object({
     variableName: z.string().min(1, { error: "Variable name is required" })
         .regex(/^[A-Za-z_$][A-Za-z0-9_$]*$/, {
             error: "Variable name must start with a letter or underscore and contain only letters, numbers, and underscores"
         }),
+    language: z.enum(["javascript", "typescript", "python", "r"]),
     code: z.string().min(1, "Code is required"),
     timeoutMs: z.string().optional()
 })
@@ -54,7 +54,8 @@ export const CodeDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }:
         resolver: zodResolver(formSchema),
         defaultValues: {
             variableName: defaultValues.variableName || "",
-            code: defaultValues.code || SAMPLE,
+            language: defaultValues.language || "javascript",
+            code: defaultValues.code || CODE_SAMPLES.javascript,
             timeoutMs: defaultValues.timeoutMs || ""
         }
     })
@@ -63,13 +64,27 @@ export const CodeDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }:
         if (open) {
             form.reset({
                 variableName: defaultValues.variableName || "",
-                code: defaultValues.code || SAMPLE,
+                language: defaultValues.language || "javascript",
+                code: defaultValues.code || CODE_SAMPLES[defaultValues.language || "javascript"],
                 timeoutMs: defaultValues.timeoutMs || ""
             })
         }
     }, [open, defaultValues, form])
 
     const watchVariableName = form.watch("variableName") || "myCode"
+    const language = form.watch("language")
+
+    // Switching language swaps the sample, but only while the editor still holds
+    // a sample: work someone has written is never replaced.
+    const handleLanguageChange = (next: CodeLanguage) => {
+        const current = form.getValues("code").trim()
+        const isUntouched = Object.values(CODE_SAMPLES).some(
+            (sample) => sample.trim() === current
+        )
+
+        form.setValue("language", next)
+        if (isUntouched || !current) form.setValue("code", CODE_SAMPLES[next])
+    }
 
     const handleSubmit = (values: CodeFormValues) => {
         onSubmit(values)
@@ -90,6 +105,36 @@ export const CodeDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }:
                     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 mt-4">
                         <FormField
                             control={form.control}
+                            name="language"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Language</FormLabel>
+                                    <Select
+                                        onValueChange={(value) =>
+                                            handleLanguageChange(value as CodeLanguage)
+                                        }
+                                        value={field.value}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {CODE_LANGUAGES.map((option) => (
+                                                <SelectItem key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
                             name="code"
                             render={({ field }) => (
                                 <FormItem>
@@ -97,6 +142,7 @@ export const CodeDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }:
                                     <FormControl>
                                         <CodeEditor
                                             value={field.value}
+                                            language={language}
                                             onChange={field.onChange}
                                         />
                                     </FormControl>
