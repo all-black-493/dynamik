@@ -72,7 +72,8 @@ export const workflowsRouter = createTRPCRouter({
                             y: z.number()
                         }),
                         data: z.record(z.string(), z.any()).optional(),
-                        parentNodeId: z.string().nullish()
+                        // React Flow's own field name for a docked child.
+                        parentId: z.string().nullish()
                     })
                 ),
                 edges: z.array(
@@ -107,7 +108,7 @@ export const workflowsRouter = createTRPCRouter({
                         type: node.type as NodeType,
                         position: node.position,
                         data: node.data || {},
-                        parentNodeId: node.parentNodeId ?? null
+                        parentNodeId: node.parentId ?? null
                     }))
                 })
 
@@ -156,7 +157,8 @@ export const workflowsRouter = createTRPCRouter({
                 id: node.id,
                 type: node.type,
                 position: node.position as { x: number, y: number },
-                data: (node.data as Record<string, unknown>) || {}
+                data: (node.data as Record<string, unknown>) || {},
+                ...(node.parentNodeId ? { parentId: node.parentNodeId } : {})
             }))
 
             const edges: Edge[] = workflow.connections.map((connection) => ({

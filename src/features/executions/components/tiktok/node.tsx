@@ -8,17 +8,7 @@ import { BaseExecutionNode } from "../base-execution-node"
 import { fetchTiktokRealtimeToken } from "./actions"
 import { TiktokDialog, TiktokFormValues } from "./dialog"
 
-type tiktokNodeData = {
-    variableName?: string;
-    credentialId?: string;
-    postMode?: "INBOX" | "DIRECT_POST";
-    videoUrl?: string;
-    title?: string;
-    privacyLevel?: string;
-    disableComment?: boolean;
-    disableDuet?: boolean;
-    disableStitch?: boolean;
-}
+type tiktokNodeData = Partial<TiktokFormValues>
 
 type TiktokNodeType = Node<tiktokNodeData>
 

@@ -59,6 +59,26 @@ export const credentialFields: Partial<Record<CredentialType, CredentialField[]>
             description: "require, or disable for a local database"
         }
     ],
+    [CredentialType.TIKTOK]: [
+        {
+            key: "accessToken",
+            label: "Access Token",
+            description: "A user access token, which is what posts. Preferences, then your app's API access.",
+            secret: true
+        },
+        {
+            key: "clientKey",
+            label: "Client Key",
+            description: "Optional. Only needed once this app refreshes tokens for you.",
+            secret: true
+        },
+        {
+            key: "clientSecret",
+            label: "Client Secret",
+            description: "Optional, alongside the client key.",
+            secret: true
+        }
+    ],
     [CredentialType.ODOO]: [
         {
             key: "url",

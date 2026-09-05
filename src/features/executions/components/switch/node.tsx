@@ -44,15 +44,21 @@ export const SwitchNode = memo((props: NodeProps<SwitchNodeType>) => {
 
     // One handle per rule, keyed by the rule's stable id so reordering rules in
     // the dialog does not rewire the canvas.
-    const outputs = [
-        ...rules.map((rule, index) => ({
-            id: rule.id,
-            label: rule.name || `rule ${index + 1}`
-        })),
-        ...(nodeData?.useFallback !== false
-            ? [{ id: SWITCH_FALLBACK_OUTPUT, label: "else" }]
-            : [])
-    ]
+    //
+    // An unconfigured Switch shows no named outputs at all. It used to show a
+    // lone "else", which is the branch for runs matching no rule, and reads as
+    // unexplained when there are no rules for it to be the alternative to.
+    const outputs = rules.length
+        ? [
+            ...rules.map((rule, index) => ({
+                id: rule.id,
+                label: rule.name || `rule ${index + 1}`
+            })),
+            ...(nodeData?.useFallback !== false
+                ? [{ id: SWITCH_FALLBACK_OUTPUT, label: "else" }]
+                : [])
+        ]
+        : []
 
     const description = rules.length
         ? `${rules.length} rule${rules.length === 1 ? "" : "s"}`

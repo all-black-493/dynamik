@@ -61,18 +61,8 @@ const credentialTypeOptions = [
         logo: "/logos/perplexity.svg"
     },
     {
-        value: CredentialType.TIKTOK_CLIENT_KEY,
-        label: "Tiktok Client Key",
-        logo: "/logos/tiktok.svg"
-    },
-    {
-        value: CredentialType.TIKTOK_CLIENT_SECRET,
-        label: "Tiktok Client Secret",
-        logo: "/logos/tiktok.svg"
-    },
-    {
-        value: CredentialType.TIKTOK_ACCESS_TOKEN,
-        label: "Tiktok Access Token",
+        value: CredentialType.TIKTOK,
+        label: "Tiktok",
         logo: "/logos/tiktok.svg"
     },
     {

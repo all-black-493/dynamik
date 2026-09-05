@@ -48,11 +48,7 @@ export const AiAgentNode = memo((props: NodeProps<AiAgentNodeType>) => {
      * half-formed on the canvas.
      */
     const attach = (type: NodeType) => {
-        const nodes = getNodes()
-        const self = nodes.find((node) => node.id === props.id)
-        if (!self) return
-
-        const existing = nodes.filter(
+        const existing = getNodes().filter(
             (node) => (node as { parentId?: string }).parentId === props.id
         ).length
 
@@ -61,13 +57,17 @@ export const AiAgentNode = memo((props: NodeProps<AiAgentNodeType>) => {
             {
                 id: createId(),
                 type,
+                // A child's position is relative to its parent, not to the
+                // canvas. Using absolute coordinates here placed it roughly
+                // twice as far away as intended, usually off screen, which is
+                // why adding one looked like nothing happening.
                 position: {
-                    x: self.position.x + existing * CHILD_SPACING_X,
-                    y: self.position.y + CHILD_OFFSET_Y
+                    x: existing * CHILD_SPACING_X,
+                    y: CHILD_OFFSET_Y
                 },
                 data: {},
-                // React Flow keeps this on the node; the workflow save maps it
-                // to parentNodeId, which is what the engine reads.
+                // React Flow's field. The workflow save maps it to
+                // parentNodeId, which is what the engine reads.
                 parentId: props.id
             } as Node
         ])

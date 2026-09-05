@@ -53,7 +53,7 @@ const formSchema = z.object({
     postMode: z.enum(["INBOX", "DIRECT_POST"]),
     videoUrl: z.string().min(1, "Video URL is required"),
     title: z.string().max(2200, "Titles cannot exceed 2200 characters").optional(),
-    privacyLevel: z.string().optional(),
+    privacyLevel: z.enum(["PUBLIC_TO_EVERYONE", "MUTUAL_FOLLOW_FRIENDS", "FOLLOWER_OF_CREATOR", "SELF_ONLY"]).optional(),
     disableComment: z.boolean(),
     disableDuet: z.boolean(),
     disableStitch: z.boolean()
@@ -81,7 +81,7 @@ export const TiktokDialog = ({
     const {
         data: credentials,
         isLoading: isLoadingCredentials
-    } = useCredentialsByType(CredentialType.TIKTOK_ACCESS_TOKEN)
+    } = useCredentialsByType(CredentialType.TIKTOK)
 
     const form = useForm<TiktokFormValues>({
         resolver: zodResolver(formSchema),
@@ -91,7 +91,7 @@ export const TiktokDialog = ({
             postMode: defaultValues.postMode || "INBOX",
             videoUrl: defaultValues.videoUrl || "",
             title: defaultValues.title || "",
-            privacyLevel: defaultValues.privacyLevel || "",
+            privacyLevel: defaultValues.privacyLevel,
             disableComment: defaultValues.disableComment ?? false,
             disableDuet: defaultValues.disableDuet ?? false,
             disableStitch: defaultValues.disableStitch ?? false
@@ -106,7 +106,7 @@ export const TiktokDialog = ({
                 postMode: defaultValues.postMode || "INBOX",
                 videoUrl: defaultValues.videoUrl || "",
                 title: defaultValues.title || "",
-                privacyLevel: defaultValues.privacyLevel || "",
+                privacyLevel: defaultValues.privacyLevel,
                 disableComment: defaultValues.disableComment ?? false,
                 disableDuet: defaultValues.disableDuet ?? false,
                 disableStitch: defaultValues.disableStitch ?? false
