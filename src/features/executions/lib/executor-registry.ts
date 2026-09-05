@@ -28,6 +28,9 @@ import { postgresExecutor } from "../components/postgres/executor";
 import { displayExecutor } from "../components/display/executor";
 import { odooExecutor } from "../components/odoo/executor";
 import { codeExecutor } from "../components/code/executor";
+import { aiAgentExecutor } from "../components/ai-agent/executor";
+import { aiModelExecutor } from "../components/ai-model/executor";
+import { aiToolExecutor } from "../components/ai-tool/executor";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.INITIAL]: manualTriggerExecutor,
@@ -58,7 +61,10 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.POSTGRES]: postgresExecutor,
     [NodeType.DISPLAY]: displayExecutor,
     [NodeType.ODOO]: odooExecutor,
-    [NodeType.CODE]: codeExecutor
+    [NodeType.CODE]: codeExecutor,
+    [NodeType.AI_AGENT]: aiAgentExecutor,
+    [NodeType.AI_MODEL]: aiModelExecutor,
+    [NodeType.AI_TOOL]: aiToolExecutor
 }
 
 export const getExecutor = (type: NodeType): NodeExecutor => {

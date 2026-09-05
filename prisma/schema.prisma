@@ -150,6 +150,9 @@ enum NodeType {
   DISPLAY
   ODOO
   CODE
+  AI_AGENT
+  AI_MODEL
+  AI_TOOL
 }
 
 model Node {
@@ -164,6 +167,13 @@ model Node {
 
   credentialId String?
   credential   Credential? @relation(fields: [credentialId], references: [id], onDelete: SetNull)
+
+  // A child is configuration for its parent rather than a step of its own: it
+  // never runs, and the engine skips it. Deleting the parent takes its
+  // attachments with it.
+  parentNodeId String?
+  parent       Node?   @relation("NodeAttachments", fields: [parentNodeId], references: [id], onDelete: Cascade)
+  children     Node[]  @relation("NodeAttachments")
 
   outputConnections Connection[] @relation("FromNode")
   inputConnections  Connection[] @relation("ToNode")

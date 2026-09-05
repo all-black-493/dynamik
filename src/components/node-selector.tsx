@@ -3,6 +3,7 @@
 import { createId } from "@paralleldrive/cuid2"
 import { useReactFlow } from "@xyflow/react"
 import {
+    BotIcon,
     ClockIcon,
     CodeIcon,
     FilterIcon,
@@ -139,6 +140,12 @@ export const nodeCategories: NodeCategory[] = [
         label: "AI",
         hint: "Generate and reason",
         nodes: [
+            {
+                type: NodeType.AI_AGENT,
+                label: "AI Agent",
+                description: "Reasons, and calls tools you attach",
+                icon: BotIcon
+            },
             {
                 type: NodeType.OPENAI,
                 label: "OpenAI",
