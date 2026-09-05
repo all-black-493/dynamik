@@ -41,7 +41,11 @@ export const executeWorkflow = inngest.createFunction(
         id: "execute-workflow",
         retries: process.env.NODE_ENV === "production" ? 3 : 0,
         onFailure: async ({ event }) => {
-            return prisma.execution.update({
+            // updateMany, so a missing row is a no-op rather than a throw. This
+            // runs on the error path: if the execution record was never written,
+            // throwing here would replace the error that actually failed the run
+            // with a Prisma not-found, losing the only useful diagnosis.
+            return prisma.execution.updateMany({
                 where: { inngestEventId: event.data.event.id },
                 data: {
                     status: ExecutionStatus.FAILED,
@@ -96,11 +100,19 @@ export const executeWorkflow = inngest.createFunction(
         }
 
         await step.run("create-execution", async () => {
-            return prisma.execution.create({
-                data: {
+            // Upsert rather than create, because a step is guaranteed to run at
+            // least once, not exactly once. If the result never reaches Inngest
+            // (a lost response, a timeout, a deploy mid-run) the step is retried,
+            // and replaying a run from the dashboard reuses the same event id.
+            // Creating would then violate the unique constraint and fail a run
+            // whose only mistake was being retried.
+            return prisma.execution.upsert({
+                where: { inngestEventId },
+                create: {
                     workflowId,
                     inngestEventId
-                }
+                },
+                update: {}
             })
         })
 
