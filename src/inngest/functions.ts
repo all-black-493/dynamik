@@ -34,6 +34,7 @@ import { postgresChannel } from "./channels/postgres";
 import { displayChannel } from "./channels/display";
 import { odooChannel } from "./channels/odoo";
 import { codeChannel } from "./channels/code";
+import { aiAgentChannel } from "./channels/ai-agent";
 
 
 export const executeWorkflow = inngest.createFunction(
@@ -86,6 +87,7 @@ export const executeWorkflow = inngest.createFunction(
             displayChannel(),
             odooChannel(),
             codeChannel(),
+            aiAgentChannel(),
         ]
     },
 
@@ -138,7 +140,28 @@ export const executeWorkflow = inngest.createFunction(
         const requiresAllInputs = (node: { data: unknown }) =>
             (node.data as { waitForAll?: boolean } | null)?.waitForAll === true
 
-        const plan = createExecutionPlan(graph.nodes, graph.connections, {
+        // Attachments are configuration for their parent, not steps. Keeping
+        // them out of the plan is what stops them being executed in their own
+        // right, and means the plan never has to know they exist.
+        const flowNodes = graph.nodes.filter((node) => !node.parentNodeId)
+
+        const attachments = new Map<string, typeof graph.nodes>()
+        for (const node of graph.nodes) {
+            if (!node.parentNodeId) continue
+            const siblings = attachments.get(node.parentNodeId) ?? []
+            siblings.push(node)
+            attachments.set(node.parentNodeId, siblings)
+        }
+
+        const childrenOf = (nodeId: string) =>
+            (attachments.get(nodeId) ?? []).map((child) => ({
+                id: child.id,
+                type: child.type as string,
+                name: child.name,
+                data: child.data as Record<string, unknown>
+            }))
+
+        const plan = createExecutionPlan(flowNodes, graph.connections, {
             requiresAllInputs
         })
 
@@ -169,7 +192,8 @@ export const executeWorkflow = inngest.createFunction(
                 userId,
                 context,
                 step,
-                publish
+                publish,
+                children: childrenOf(node.id)
             })
 
             const outcome = toOutcome(result)
@@ -215,7 +239,8 @@ export const executeWorkflow = inngest.createFunction(
                             // the second pass would be handed the first pass's
                             // memoized result instead of doing the work.
                             step: scopeStep(step, `${node.id}-${index}`),
-                            publish
+                            publish,
+                            children: childrenOf(bodyNode.id)
                         })
 
                         const bodyOutcome = toOutcome(bodyResult)

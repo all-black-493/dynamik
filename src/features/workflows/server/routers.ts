@@ -71,7 +71,8 @@ export const workflowsRouter = createTRPCRouter({
                             x: z.number(),
                             y: z.number()
                         }),
-                        data: z.record(z.string(), z.any()).optional()
+                        data: z.record(z.string(), z.any()).optional(),
+                        parentNodeId: z.string().nullish()
                     })
                 ),
                 edges: z.array(
@@ -106,7 +107,7 @@ export const workflowsRouter = createTRPCRouter({
                         type: node.type as NodeType,
                         position: node.position,
                         data: node.data || {},
-
+                        parentNodeId: node.parentNodeId ?? null
                     }))
                 })
 

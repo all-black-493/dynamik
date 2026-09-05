@@ -3,6 +3,19 @@ import type { GetStepTools, Inngest } from "inngest"
 import { DEFAULT_OUTPUT } from "./outputs"
 
 export type WorkflowContext = Record<string, unknown>
+
+/**
+ * A node attached to another node rather than placed in the flow.
+ *
+ * Attachments are configuration: a model, a tool. They never execute, and the
+ * engine hands them to their parent instead of running them.
+ */
+export type AttachedNode = {
+    id: string
+    type: string
+    name: string
+    data: Record<string, unknown>
+}
 export type StepTools = GetStepTools<Inngest.Any>
 export interface NodeExecutorParams<TData = Record<string, unknown>> {
     data: TData;
@@ -10,7 +23,9 @@ export interface NodeExecutorParams<TData = Record<string, unknown>> {
     userId: string;
     context: WorkflowContext;
     step: StepTools;
-    publish: Realtime.PublishFn
+    publish: Realtime.PublishFn;
+    /** Nodes docked to this one. Empty for every node that takes none. */
+    children: AttachedNode[]
 }
 
 export { DEFAULT_OUTPUT } from "./outputs"

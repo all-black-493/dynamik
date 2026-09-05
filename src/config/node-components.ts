@@ -23,6 +23,9 @@ import { PostgresNode } from "@/features/executions/components/postgres/node";
 import { DisplayNode } from "@/features/executions/components/display/node";
 import { OdooNode } from "@/features/executions/components/odoo/node";
 import { CodeNode } from "@/features/executions/components/code/node";
+import { AiAgentNode } from "@/features/executions/components/ai-agent/node";
+import { AiModelNode } from "@/features/executions/components/ai-model/node";
+import { AiToolNode } from "@/features/executions/components/ai-tool/node";
 import GoogleFormTrigger from "@/features/triggers/components/google-form-trigger/node";
 import ManualTriggerNode from "@/features/triggers/components/manual-trigger/node";
 import MPESATrigger from "@/features/triggers/components/MPESA-trigger/node";
@@ -59,7 +62,10 @@ export const nodeComponents = {
     [NodeType.POSTGRES]: PostgresNode,
     [NodeType.DISPLAY]: DisplayNode,
     [NodeType.ODOO]: OdooNode,
-    [NodeType.CODE]: CodeNode
+    [NodeType.CODE]: CodeNode,
+    [NodeType.AI_AGENT]: AiAgentNode,
+    [NodeType.AI_MODEL]: AiModelNode,
+    [NodeType.AI_TOOL]: AiToolNode
 
 } as const satisfies NodeTypes
 
