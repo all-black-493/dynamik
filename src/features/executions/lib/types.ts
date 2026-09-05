@@ -1,5 +1,6 @@
 import type { Realtime } from "@inngest/realtime";
 import type { GetStepTools, Inngest } from "inngest"
+import { DEFAULT_OUTPUT } from "./outputs"
 
 export type WorkflowContext = Record<string, unknown>
 export type StepTools = GetStepTools<Inngest.Any>
@@ -12,8 +13,7 @@ export interface NodeExecutorParams<TData = Record<string, unknown>> {
     publish: Realtime.PublishFn
 }
 
-/** The output every non-branching node and connection uses. */
-export const DEFAULT_OUTPUT = "main"
+export { DEFAULT_OUTPUT } from "./outputs"
 
 /**
  * Marks a branching result.
