@@ -4,6 +4,7 @@ import { createId } from "@paralleldrive/cuid2"
 import { useReactFlow } from "@xyflow/react"
 import {
     ClockIcon,
+    CodeIcon,
     FilterIcon,
     GitBranchIcon,
     GitMergeIcon,
@@ -124,6 +125,12 @@ export const nodeCategories: NodeCategory[] = [
                 label: "HTTP Request",
                 description: "Call any API",
                 icon: GlobeIcon
+            },
+            {
+                type: NodeType.CODE,
+                label: "Code",
+                description: "Transform data with JavaScript",
+                icon: CodeIcon
             }
         ]
     },

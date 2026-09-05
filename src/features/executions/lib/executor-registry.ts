@@ -27,6 +27,7 @@ import { waitExecutor } from "../components/wait/executor";
 import { postgresExecutor } from "../components/postgres/executor";
 import { displayExecutor } from "../components/display/executor";
 import { odooExecutor } from "../components/odoo/executor";
+import { codeExecutor } from "../components/code/executor";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.INITIAL]: manualTriggerExecutor,
@@ -56,7 +57,8 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.WAIT]: waitExecutor,
     [NodeType.POSTGRES]: postgresExecutor,
     [NodeType.DISPLAY]: displayExecutor,
-    [NodeType.ODOO]: odooExecutor
+    [NodeType.ODOO]: odooExecutor,
+    [NodeType.CODE]: codeExecutor
 }
 
 export const getExecutor = (type: NodeType): NodeExecutor => {

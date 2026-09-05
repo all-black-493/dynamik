@@ -149,6 +149,7 @@ enum NodeType {
   POSTGRES
   DISPLAY
   ODOO
+  CODE
 }
 
 model Node {

@@ -22,6 +22,7 @@ import { WaitNode } from "@/features/executions/components/wait/node";
 import { PostgresNode } from "@/features/executions/components/postgres/node";
 import { DisplayNode } from "@/features/executions/components/display/node";
 import { OdooNode } from "@/features/executions/components/odoo/node";
+import { CodeNode } from "@/features/executions/components/code/node";
 import GoogleFormTrigger from "@/features/triggers/components/google-form-trigger/node";
 import ManualTriggerNode from "@/features/triggers/components/manual-trigger/node";
 import MPESATrigger from "@/features/triggers/components/MPESA-trigger/node";
@@ -57,7 +58,8 @@ export const nodeComponents = {
     [NodeType.WAIT]: WaitNode,
     [NodeType.POSTGRES]: PostgresNode,
     [NodeType.DISPLAY]: DisplayNode,
-    [NodeType.ODOO]: OdooNode
+    [NodeType.ODOO]: OdooNode,
+    [NodeType.CODE]: CodeNode
 
 } as const satisfies NodeTypes
 
