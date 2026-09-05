@@ -5,7 +5,7 @@ import { decrypt } from "@/lib/encryption";
 import Handlebars from "handlebars";
 import { decode } from "html-entities";
 import { NonRetriableError } from "inngest";
-import ky from "ky";
+import ky, { HTTPError } from "ky";
 
 Handlebars.registerHelper("json", (context) => {
     const stringified = JSON.stringify(context, null, 2)
@@ -28,6 +28,16 @@ type whatsappData = {
 type whatsappResponse = {
     messages?: { id: string }[];
     contacts?: { wa_id: string }[]
+}
+
+/** Meta wraps a failure in an error object with the useful part inside. */
+type whatsappError = {
+    error?: {
+        message?: string;
+        type?: string;
+        code?: number;
+        error_data?: { details?: string }
+    }
 }
 
 export const whatsappExecutor: NodeExecutor<whatsappData> = async ({
@@ -56,7 +66,9 @@ export const whatsappExecutor: NodeExecutor<whatsappData> = async ({
         })
     )
 
-    if (!data.variableName) {
+    const variableName = data.variableName
+
+    if (!variableName) {
         throw await fail("Variable name is missing")
     }
 
@@ -127,7 +139,7 @@ export const whatsappExecutor: NodeExecutor<whatsappData> = async ({
 
             return {
                 ...context,
-                [data.variableName!]: {
+                [variableName]: {
                     whatsappMessageSent: true,
                     messageId: response.messages?.[0]?.id,
                     recipient: response.contacts?.[0]?.wa_id ?? recipient,
@@ -152,6 +164,25 @@ export const whatsappExecutor: NodeExecutor<whatsappData> = async ({
                 status: "error"
             })
         )
+
+        // Meta explains the refusal in the body: an unverified recipient, a
+        // template needed outside the 24 hour window, an expired token. Letting
+        // a bare HTTP error through would record none of that.
+        if (error instanceof HTTPError) {
+            const detail = (await error.response
+                .clone()
+                .json()
+                .catch(() => null)) as whatsappError | null
+
+            const message = detail?.error?.error_data?.details ?? detail?.error?.message
+
+            if (message) {
+                throw new Error(
+                    `Whatsapp node: ${message}${detail?.error?.code ? ` (code ${detail.error.code})` : ""}`
+                )
+            }
+        }
+
         throw error
     }
 

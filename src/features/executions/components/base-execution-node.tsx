@@ -71,7 +71,18 @@ export const BaseExecutionNode = memo(({
                 status={status}
                 variant="border"
             >
-                <BaseNode status={status} onDoubleClick={onDoubleClick}>
+                <BaseNode
+                    status={status}
+                    onDoubleClick={onDoubleClick}
+                    // Handles are spread over the node's height, so a node with
+                    // several outputs needs enough of it for the labels to clear
+                    // one another.
+                    style={
+                        outputs && outputs.length > 1
+                            ? { minHeight: outputs.length * 26 + 20 }
+                            : undefined
+                    }
+                >
                     <BaseNodeContent>
                         {typeof Icon === "string" ? (
                             <Image src={Icon} alt={name} width={16} height={16} />
@@ -96,7 +107,13 @@ export const BaseExecutionNode = memo(({
                                         top: `${((index + 1) * 100) / (outputs.length + 1)}%`
                                     }}
                                 >
-                                    <span className="pointer-events-none absolute left-4 -translate-y-1/2 top-1/2 text-[10px] font-medium text-muted-foreground">
+                                    {/*
+                                      A label belongs to its handle, so it is
+                                      small, muted and set on a chip. Left plain
+                                      it read as stray prose beside the node,
+                                      and two of them ran together.
+                                    */}
+                                    <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 whitespace-nowrap rounded bg-background/90 px-1 py-px font-medium text-[9px] text-muted-foreground uppercase tracking-wide">
                                         {output.label}
                                     </span>
                                 </BaseHandle>

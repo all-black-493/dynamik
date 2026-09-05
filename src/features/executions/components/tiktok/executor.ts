@@ -1,7 +1,7 @@
 import type { NodeExecutor } from "@/features/executions/lib/types";
 import { tiktokChannel } from "@/inngest/channels/tiktok";
-import prisma from "@/lib/db";
-import { decrypt } from "@/lib/encryption";
+import { getDecryptedCredentialFields } from "@/features/credentials/server/get-credential";
+import { CredentialType } from "@/generated/prisma";
 import Handlebars from "handlebars";
 import { decode } from "html-entities";
 import { NonRetriableError } from "inngest";
@@ -19,7 +19,14 @@ const MAX_TITLE_LENGTH = 2200
 // DIRECT_POST publishes to the account and needs the video.publish scope.
 // INBOX drops the video into the user's TikTok drafts for them to finish and
 // publish by hand, and only needs video.upload.
-type postMode = "DIRECT_POST" | "INBOX"
+export type postMode = "DIRECT_POST" | "INBOX"
+
+/** The set the Content Posting API accepts, rather than a loose string. */
+export type tiktokPrivacyLevel =
+    | "PUBLIC_TO_EVERYONE"
+    | "MUTUAL_FOLLOW_FRIENDS"
+    | "FOLLOWER_OF_CREATOR"
+    | "SELF_ONLY"
 
 type tiktokData = {
     variableName?: string;
@@ -27,7 +34,7 @@ type tiktokData = {
     postMode?: postMode;
     videoUrl?: string;
     title?: string;
-    privacyLevel?: string;
+    privacyLevel?: tiktokPrivacyLevel;
     disableComment?: boolean;
     disableDuet?: boolean;
     disableStitch?: boolean;
@@ -64,11 +71,14 @@ export const tiktokExecutor: NodeExecutor<tiktokData> = async ({
         })
     )
 
-    if (!data.variableName) {
+    const variableName = data.variableName
+    const credentialId = data.credentialId
+
+    if (!variableName) {
         throw await fail("Variable name is missing")
     }
 
-    if (!data.credentialId) {
+    if (!credentialId) {
         throw await fail("Credential is required")
     }
 
@@ -92,20 +102,23 @@ export const tiktokExecutor: NodeExecutor<tiktokData> = async ({
         ? decode(Handlebars.compile(data.title)(context)).slice(0, MAX_TITLE_LENGTH)
         : ""
 
-    const credential = await step.run("get-credential", () => {
-        return prisma.credential.findUnique({
-            where: {
-                id: data.credentialId,
-                userId
-            }
+    const credential = await step.run("get-credential", () =>
+        getDecryptedCredentialFields({
+            credentialId,
+            userId,
+            type: CredentialType.TIKTOK
         })
-    })
+    )
 
     if (!credential) {
         throw await fail("Credential not found")
     }
 
-    const accessToken = decrypt(credential.value)
+    const accessToken = credential.accessToken
+
+    if (!accessToken) {
+        throw await fail("The credential has no access token")
+    }
 
     try {
         const result = await step.run("tiktok-publish-init", async () => {
@@ -155,7 +168,7 @@ export const tiktokExecutor: NodeExecutor<tiktokData> = async ({
 
             return {
                 ...context,
-                [data.variableName!]: {
+                [variableName]: {
                     tiktokPostInitiated: true,
                     publishId,
                     postMode: mode,
