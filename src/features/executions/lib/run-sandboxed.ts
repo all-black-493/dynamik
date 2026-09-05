@@ -1,6 +1,7 @@
 import "server-only"
 
 import { getQuickJS } from "quickjs-emscripten"
+import { SandboxError } from "./sandbox-error"
 
 /**
  * Runs user JavaScript in a real isolate.
@@ -25,12 +26,7 @@ const MAX_TIMEOUT_MS = 30_000
 const MEMORY_LIMIT_BYTES = 64 * 1024 * 1024
 const MAX_OUTPUT_BYTES = 1024 * 1024
 
-export class SandboxError extends Error {
-    constructor(message: string) {
-        super(message)
-        this.name = "SandboxError"
-    }
-}
+export { SandboxError }
 
 export type SandboxResult = {
     value: unknown

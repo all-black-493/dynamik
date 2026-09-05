@@ -1,10 +1,12 @@
 import type { NodeExecutor } from "@/features/executions/lib/types";
-import { runSandboxed, SandboxError } from "@/features/executions/lib/run-sandboxed";
+import type { CodeLanguage } from "@/features/executions/lib/code-languages";
+import { runCode, SandboxError } from "@/features/executions/lib/run-code";
 import { codeChannel } from "@/inngest/channels/code";
 import { NonRetriableError } from "inngest";
 
 type codeData = {
     variableName?: string;
+    language?: CodeLanguage;
     code?: string;
     timeoutMs?: string;
 }
@@ -39,7 +41,8 @@ export const codeExecutor: NodeExecutor<codeData> = async ({
 
     try {
         const result = await step.run("code-run", () =>
-            runSandboxed({
+            runCode({
+                language: data.language ?? "javascript",
                 code,
                 input: context,
                 timeoutMs: Number(data.timeoutMs) || undefined
